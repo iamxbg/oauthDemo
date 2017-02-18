@@ -173,6 +173,10 @@ public class OAuthController {
 	public ModelAndView token(@RequestParam("oauthTokenParam") OAuthTokenParams params,HttpServletRequest req){
 		OAuthTokenRequest request=new OAuthTokenRequest(req);
 		//OAuthJSONAccessTokenResponse response=new OAuthJSONAccessTokenResponse();
+		
+		//Validate key by state and tag,validate expire_in...
+		params
+		
 		OAuthTokenResponseBuilder builder=new OAuthTokenResponseBuilder(HttpStatus.OK)
 						.setAccessToken(ACCESS_TOKEN)
 						.setTokenType(TokenType.BEARER.toString())
