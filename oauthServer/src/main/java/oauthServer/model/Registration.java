@@ -7,17 +7,18 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="app_registration_list")
+@Table(name="app_regisration_list")
 public class Registration {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
+	private String app_name;
 	private String client_id;
 	private String client_secrect;
-	private String authorization_uri;
-	private String token_uri;
-	private String redirection_uri;
+	private String authorization_endpoint;
+	private String token_endpoint;
+	private String redirection_endpoint;
 	
 	
 
@@ -63,38 +64,70 @@ public class Registration {
 
 
 
-	public String getAuthorization_uri() {
-		return authorization_uri;
+	public String getAuthorization_endpoint() {
+		return authorization_endpoint;
 	}
 
 
 
-	public void setAuthorization_uri(String authorization_uri) {
-		this.authorization_uri = authorization_uri;
+	public void setAuthorization_endpoint(String authorization_endpoint) {
+		this.authorization_endpoint = authorization_endpoint;
 	}
 
 
 
-	public String getToken_uri() {
-		return token_uri;
+	public String getToken_endpoint() {
+		return token_endpoint;
 	}
 
 
 
-	public void setToken_uri(String token_uri) {
-		this.token_uri = token_uri;
+	public void setToken_endpoint(String token_endpoint) {
+		this.token_endpoint = token_endpoint;
 	}
 
 
 
-	public String getRedirection_uri() {
-		return redirection_uri;
+	public String getRedirection_endpoint() {
+		return redirection_endpoint;
 	}
 
 
 
-	public void setRedirection_uri(String redirection_uri) {
-		this.redirection_uri = redirection_uri;
+	public void setRedirection_endpoint(String redirection_endpoint) {
+		this.redirection_endpoint = redirection_endpoint;
 	}
+
+
+
+	public Registration(int id, String app_name, String client_id, String client_secrect, String authorization_endpoint,
+			String token_endpoint, String redirection_endpoint) {
+		super();
+		this.id = id;
+		this.app_name = app_name;
+		this.client_id = client_id;
+		this.client_secrect = client_secrect;
+		this.authorization_endpoint = authorization_endpoint;
+		this.token_endpoint = token_endpoint;
+		this.redirection_endpoint = redirection_endpoint;
+	}
+
+
+
+	public String getApp_name() {
+		return app_name;
+	}
+
+
+
+	public void setApp_name(String app_name) {
+		this.app_name = app_name;
+	}
+
+
+
+
+
+
 
 }

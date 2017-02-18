@@ -1,4 +1,4 @@
-package oauthServer.config;
+package oauthClient.config;
 
 import java.util.Properties;
 
@@ -9,25 +9,26 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.orm.hibernate4.LocalSessionFactoryBuilder;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.context.annotation.ComponentScan.Filter;
 
-@ComponentScan(basePackages={"oauthServer"}
-,excludeFilters={@Filter(type=FilterType.ANNOTATION,value={EnableWebMvc.class})})
+import com.mysql.jdbc.Driver;
+
 @Configuration
 @EnableTransactionManagement
+@ComponentScan(basePackages={"oauthClient"}
+	,excludeFilters={@Filter(type=FilterType.ANNOTATION,value={EnableWebMvc.class})})
 public class RootConfig {
 	
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
 	private static String PASSWORD="";
 	private static String USERNAME="root";
-	private static String URI="jdbc:mysql://127.0.0.1:3306/tf02";
+	private static String URI="jdbc:mysql://127.0.0.1:3306/oauthClient";
 
 	public RootConfig() {
 		// TODO Auto-generated constructor stub

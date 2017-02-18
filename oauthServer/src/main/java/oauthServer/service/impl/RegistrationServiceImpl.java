@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import oauthServer.dao.RegistrationDao;
 import oauthServer.model.Registration;
-import oauthServer.service.RegistrationService;
+import oauthServer.service.OAuthService;
 
 @Service
 @Transactional
-public class RegistrationServiceImpl implements RegistrationService{
+public class RegistrationServiceImpl implements OAuthService{
 
 	@Autowired
 	private RegistrationDao rDao;
@@ -27,6 +27,12 @@ public class RegistrationServiceImpl implements RegistrationService{
 	public List<Registration> getRegistrationList() {
 		// TODO Auto-generated method stub
 		return rDao.findAll();
+	}
+
+	@Override
+	public void doRegistration(Registration r) {
+		// TODO Auto-generated method stub
+		rDao.add(r);
 	}
 	
 	
