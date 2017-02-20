@@ -2,6 +2,9 @@ package oauthServer.dao.impl;
 
 import java.util.List;
 
+import javax.servlet.Registration;
+
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -53,6 +56,14 @@ public class UserDaoImpl implements UserDao {
 				.setString("username", username)
 				.setString("password", password)
 				.uniqueResult();
+	}
+
+	@Override
+	public void deleteById(int id) {
+		// TODO Auto-generated method stub
+		Session sess=sf.getCurrentSession();
+			User u=sess.get(User.class, id);
+			if(u!=null) sess.delete(u);
 	}
 
 }

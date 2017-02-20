@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService{
 	private UserDao userDao;
 	
 	@Override
-	public void addUser(User u) {
+	public void add(User u) {
 		// TODO Auto-generated method stub
 		userDao.add(u);
 	}
@@ -33,5 +33,20 @@ public class UserServiceImpl implements UserService{
 		// TODO Auto-generated method stub
 		return userDao.findByUsernameAndPassword(username, password);
 	}
+
+	@Override
+	public void delete(int id) {
+		// TODO Auto-generated method stub
+		 userDao.deleteById(id);;
+	}
+
+	@Override
+	public void update(User u) {
+		// TODO Auto-generated method stub
+		userDao.update(u);
+	}
+	
+	
+
 
 }

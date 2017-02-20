@@ -6,5 +6,5 @@ import oauthServer.model.Registration;
 
 public interface RegistrationDao extends CommonDao<Registration>{
 	
-	
+	public Registration findByClientId(String client_id);
 }

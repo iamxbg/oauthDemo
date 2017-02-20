@@ -28,7 +28,7 @@ public class RootConfig {
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
 	private static String PASSWORD="";
 	private static String USERNAME="root";
-	private static String URI="jdbc:mysql://127.0.0.1:3306/oauthClient";
+	private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_client";
 
 	public RootConfig() {
 		// TODO Auto-generated constructor stub

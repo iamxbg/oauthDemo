@@ -6,9 +6,13 @@ import oauthServer.model.User;
 
 public interface UserService {
 
-	public void addUser(User u);
+	public void add(User u);
 	
 	public User findByUsernameAndPassword(String username,String password);
 	
 	public List<User> findAll();
+	
+	public void delete(int id);
+	
+	public void update(User u);
 }

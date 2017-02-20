@@ -15,4 +15,6 @@ public interface CommonDao <T>{
 	public void update(T t);
 	
 	
+	public void deleteById(int id);
+	
 }

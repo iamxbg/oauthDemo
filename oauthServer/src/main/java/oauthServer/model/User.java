@@ -1,10 +1,14 @@
 package oauthServer.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="user_t")
@@ -14,18 +18,19 @@ public class User {
 	private int id;
 	private String username;
 	private String password;
-	private String real_name;
+	private String name;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date create_time;
 	
 	public User() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public User(int id, String username, String password, String real_name) {
+	public User(String username, String password, String name) {
 		super();
-		this.id = id;
 		this.username = username;
 		this.password = password;
-		this.real_name = real_name;
+		this.name = name;
 	}
 
 	public int getId() {
@@ -52,13 +57,24 @@ public class User {
 		this.password = password;
 	}
 
-	public String getReal_name() {
-		return real_name;
+	public String getName() {
+		return name;
 	}
 
-	public void setReal_name(String real_name) {
-		this.real_name = real_name;
+	public void setName(String name) {
+		this.name = name;
 	}
+
+	public Date getCreate_time() {
+		return create_time;
+	}
+
+	public void setCreate_time(Date create_time) {
+		this.create_time = create_time;
+	}
+
+
+	
 	
 	
 	

@@ -1,5 +1,7 @@
 package oauthServer.model;
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,20 +9,34 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="app_regisration_list")
+@Table(name="registration_t")
 public class Registration {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
-	private String app_name;
+	private String name;
 	private String client_id;
 	private String client_secrect;
-	private String authorization_endpoint;
-	private String token_endpoint;
-	private String redirection_endpoint;
+	private String description;
+	private Date create_time;
+	private String redirection_uri;
+	private String response_type;
 	
-	
+
+
+	public Registration(String name, String client_id, String client_secrect, String description,
+			String redirection_uri, String response_type) {
+		super();
+		this.name = name;
+		this.client_id = client_id;
+		this.client_secrect = client_secrect;
+		this.description = description;
+		this.redirection_uri = redirection_uri;
+		this.response_type = response_type;
+	}
+
+
 
 	public Registration() {
 		// TODO Auto-generated constructor stub
@@ -64,65 +80,64 @@ public class Registration {
 
 
 
-	public String getAuthorization_endpoint() {
-		return authorization_endpoint;
+	public String getName() {
+		return name;
 	}
 
 
 
-	public void setAuthorization_endpoint(String authorization_endpoint) {
-		this.authorization_endpoint = authorization_endpoint;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 
 
-	public String getToken_endpoint() {
-		return token_endpoint;
+	public String getDescription() {
+		return description;
 	}
 
 
 
-	public void setToken_endpoint(String token_endpoint) {
-		this.token_endpoint = token_endpoint;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 
 
-	public String getRedirection_endpoint() {
-		return redirection_endpoint;
+	public Date getCreate_time() {
+		return create_time;
 	}
 
 
 
-	public void setRedirection_endpoint(String redirection_endpoint) {
-		this.redirection_endpoint = redirection_endpoint;
+	public void setCreate_time(Date create_time) {
+		this.create_time = create_time;
 	}
 
 
 
-	public Registration(int id, String app_name, String client_id, String client_secrect, String authorization_endpoint,
-			String token_endpoint, String redirection_endpoint) {
-		super();
-		this.id = id;
-		this.app_name = app_name;
-		this.client_id = client_id;
-		this.client_secrect = client_secrect;
-		this.authorization_endpoint = authorization_endpoint;
-		this.token_endpoint = token_endpoint;
-		this.redirection_endpoint = redirection_endpoint;
+	public String getRedirection_uri() {
+		return redirection_uri;
 	}
 
 
 
-	public String getApp_name() {
-		return app_name;
+	public void setRedirection_uri(String redirection_uri) {
+		this.redirection_uri = redirection_uri;
 	}
 
 
 
-	public void setApp_name(String app_name) {
-		this.app_name = app_name;
+	public String getResponse_type() {
+		return response_type;
 	}
+
+
+
+	public void setResponse_type(String response_type) {
+		this.response_type = response_type;
+	}
+
 
 
 

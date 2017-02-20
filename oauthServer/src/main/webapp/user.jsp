@@ -25,24 +25,48 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	
 </head>
 <body>
-	<div style='border:1px solid red;'>
-		<table>
-			<c:forEach items="${userList }" var='u'>
-				<tr><td>username</td><td>${u.username }</td></tr>
-				<tr><td>real_name</td><td>${u.real_name }</td></tr>
-			</c:forEach>
+	<div><b>用戶管理介面</b></div>
+	<div id='userList' style='border:1px solid red;'>
+		
+		<div>用戶列表</div>
+		<c:forEach items="${userList }" var='u'>
+		<table>		
+				<tr><td>真實姓名:</td><td>${u.name}</td></tr>
+				<tr><td>用戶名:</td><td>${u.username }</td></tr>
+				<tr><td>密碼:</td><td>${u.password}</td></tr>
+				<tr><td><button class='del' id="${u.id}">刪除</button></td></tr>
 		</table>
+		</c:forEach>
 	</div>
 	<div style='border:1px solid blue'>
+		<div>新建用戶:</div>
 		<form action='<%=basePath%>user/add' method='post'>
 		<table>
-			<tr><td>username</td><td><input name='username' /></td></tr>
-			<tr><td>real_name</td><td><input name='real_name'/></td></tr>
-			<tr><td>password</td><td><input name='password' type='password'/></td></tr>
-			<tr><input type='submit' value='提交'/></tr>
+			<tr><td>真實姓名:</td><td><input name='name' /></td></tr>
+			<tr><td>用戶名:</td><td><input name='username'/></td></tr>
+			<tr><td>密碼:</td><td><input name='password' type='password'/></td></tr>
+			<tr><td><input type='submit' value='提交'/></td></tr>
 		</table>
 	
 		</form>
 	</div>
+	
+	<script type="text/javascript">
+	
+	$(function(){
+		$('#userList').on('click','.del',function(){
+			var id=$(this).attr('id');
+			
+			var form=document.createElement('form');
+				form.action='<%=basePath%>user/del/'+id;
+				form.method='post';
+				document.body.appendChild(form);
+				form.submit();
+			
+		})
+		
+	})
+
+	</script>
 </body>
 </html>

@@ -2,6 +2,7 @@ package oauthServer.dao.impl;
 
 import java.util.List;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -52,6 +53,24 @@ public class RegistrationDaoImpl implements RegistrationDao{
 	public void update(Registration t) {
 		// TODO Auto-generated method stub
 		sf.getCurrentSession().update(t);
+	}
+
+	@Override
+	public void deleteById(int id) {
+		// TODO Auto-generated method stub
+	
+		Session sess=sf.getCurrentSession();
+			Registration r=sess.get(Registration.class, id);
+			if(r!=null) sess.delete(r);
+	}
+	
+
+	@Override
+	public Registration findByClientId(String client_id) {
+		// TODO Auto-generated method stub
+		return (Registration) sf.getCurrentSession().createQuery("from Registration r where r.client_id =:client_id")
+				.setString("client_id", client_id)
+				.uniqueResult();
 	}
 
 }
