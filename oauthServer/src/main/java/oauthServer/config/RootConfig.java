@@ -92,7 +92,7 @@ public class RootConfig {
 			//cf.setDatabase(REDIS_DATABASE_INDEX);
 			//cf.setPort(REDIS_PORT);
 			cf.setHostName(REDIS_HOSTNAME);
-			//cf.setPassword(REDIS_PASSWORD);
+			cf.setPassword(REDIS_PASSWORD);
 			
 		return cf;
 	}

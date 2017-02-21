@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -29,5 +30,18 @@ public class RedisTest {
 	public void testConnection(){
 		RedisConnection conn=cf.getConnection();
 		Assert.assertNotNull(conn);
+	
+		
 	}
+	
+	
+	@Test
+	public void testTemplate(){
+		SetOperations<String, String> setOprs=opr.opsForSet();
+			
+		setOprs.add("springSet", "val1","val2","val3");
+		
+	}
+	
+
 }

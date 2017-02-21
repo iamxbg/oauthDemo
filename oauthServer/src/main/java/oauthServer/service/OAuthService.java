@@ -2,18 +2,19 @@ package oauthServer.service;
 
 import java.util.List;
 
-import oauthServer.model.Registration;
-
 public interface OAuthService {
-	
-	public static String AUTHORIZATION_URI="fake_authorization_uri";
-	public static String TOKEN_URI="fake_token_uri";
-	
-	public List<Registration> getRegistrationList();
-	
-	public void doRegistration(Registration r);
+
+	//authorization-code format
+	// key: client_id:user_id:timestampInMilliseconds
+	// val: HASH_CHARACTERS
 	
 	
-	public String findRedirectLocationUriByClient_id(String client_id);
+	public String addAuthzCode(String client_id,String user_id,String scopes);
+	
+	public String addAccessToken(String client_id,String user_id,String scopes);
+	
+	public boolean isAccessTokenExists(String token);
+	
+	public boolean isAuthzCodeExist(String code);
 	
 }

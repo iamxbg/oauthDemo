@@ -7,6 +7,7 @@
   <modules>
   	<module>oauthServer</module>
   	<module>oauthClient</module>
+  	<module>oauthResourceSever</module>
   </modules>
   
   

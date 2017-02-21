@@ -4,10 +4,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+
 import static oauthServer.util.OAuthUtils.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +42,6 @@ import org.apache.oltu.oauth2.common.message.types.GrantType;
 import org.apache.oltu.oauth2.common.message.types.ResponseType;
 import org.apache.oltu.oauth2.common.message.types.TokenType;
 import org.apache.oltu.oauth2.common.parameters.OAuthParametersApplier;
-import org.apache.oltu.oauth2.common.utils.OAuthUtils;
 import org.apache.oltu.oauth2.httpclient4.HttpClient4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
@@ -55,10 +60,12 @@ import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.RedirectView;
 
 import oauthServer.model.User;
+import oauthServer.service.OAuthService;
 import oauthServer.service.RegistrationService;
 import oauthServer.service.UserService;
 import oauthServer.util.OAuthConstants;
 import oauthServer.util.OAuthTokenParams;
+import oauthServer.util.OAuthUtils;
 
 @Controller
 @RequestMapping(path="/oauth")
@@ -70,8 +77,9 @@ public class OAuthController {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private RegistrationService oauthService;
-
+	private RegistrationService registrationService;
+	@Autowired
+	private OAuthService oauthService;
 	
 	@RequestMapping(path="/authorizeView")
 	public ModelAndView authorize_credential(HttpServletRequest req,ModelAndView mav){
@@ -94,9 +102,6 @@ public class OAuthController {
 			e.printStackTrace();
 		} 
 
-		
-		//prepare the error page!
-		
 		return null;
 	
 
@@ -104,75 +109,56 @@ public class OAuthController {
 
 
 	@RequestMapping(path="/authorize")
-	public ModelAndView authorize(@RequestParam("username") String username
-				,@RequestParam("password") String password
-				,HttpServletRequest req
-				,HttpServletResponse  resp
-				,ModelAndView mav){
+	@Consumes("application/x-www-form-urlencoded")   //?
+	@Produces("application/x-www-form-urlencoded")
+	public ModelAndView authorize(HttpServletRequest req,ModelAndView mav){
 
-		
-		User user=userService.findByUsernameAndPassword(username, password);
-
-		
-		OAuthAuthzRequest authzRequest=null;
-		OAuthResponse response=null;
-		
 		
 		try {
-			authzRequest=new OAuthAuthzRequest(req);
-		
-			if(user!=null){
+			OAuthAuthzRequest request=new OAuthAuthzRequest(req);
 				
-				logger.log(Level.INFO, "found user:"+user.getName());
-				//authorize successful, return authorization-code ,
-				// and redirect to client_server.
+				String response_type=request.getResponseType();
+				String client_id=request.getClientId();
+				String redirect_uri=request.getRedirectURI();
+				Set<String> scopes=request.getScopes();
+				String state=request.getState();
+				String user_id=request.getParam("user_id");
 				
-				String authzCode=generateAuthorizationCode();
+				//using username and password to validate now, may replcae later!
 				
-//				 response=OAuthASResponse.authorizationResponse(req, HttpServletResponse.SC_FOUND)
-//					.setCode("authzCode")
-//					.setExpiresIn(OAuthConstants.AUTHORIZATION_CODE_EXPIRE_IN)
-//					.setScope(getScope())
-//					.location(authzRequest.getRedirectURI())
-//					.buildJSONMessage();
-
-				 
-				 mav.addObject(OAuth.OAUTH_CODE, "AuthzCode233");
-				// mav.addObject(OAuth.OAuth, OAuthConstants.AUTHORIZATION_CODE_EXPIRE_IN);
-				 mav.addObject(OAuth.OAUTH_SCOPE, findScope());
-				 mav.addObject(OAuth.OAUTH_REDIRECT_URI, authzRequest.getRedirectURI());
-				 
-				 
-				 
-				 mav.setView(new RedirectView("http://localhost:8081/oauthClient/oauth/authzResult"));
-				 
-				 return mav;
-			}else{
+				String username=request.getParam("username");
+				String password=request.getParam("password");
 				
-				//user not authorization pass, return authorization view.
+				//validate from DB if clent_id ,redirect_uri, and user is ok!
 				
-				response=OAuthASResponse.errorResponse(HttpServletResponse.SC_BAD_REQUEST)
-					.setState(authzRequest.getState())
-					.location(authzRequest.getRedirectURI())
-					.buildHeaderMessage();
-		
+				User user=userService.findByUsernameAndPassword(username, password);
+				
+				
+				if(user!=null){
+					//check if DB's user_id equal with form-submit!
+					
+					//if equals
+						String scope=OAuthUtils.convertScopesToScopeStr(scopes);
+						
+						
+						String authzCode=oauthService.addAuthzCode(client_id, user_id, scope);
+						
+						mav.addObject(OAuth.OAUTH_CODE, "code");
+						mav.addObject(OAuth.OAUTH_STATE, "state");
+	
+						
+						mav.setViewName(new RedirectView(redirect_uri,false).toString());
+						return mav;
+						
+				}
+				
+				
+				
 			
-				
-				
-			}
-
-		} catch (OAuthSystemException e1) {
-			// TODO Auto-generated catch block		
-			e1.printStackTrace();
-			logger.log(Level.ERROR, e1.getMessage());
-			
-		} catch (OAuthProblemException e1) {
+		} catch (OAuthSystemException | OAuthProblemException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			logger.log(Level.ERROR, e1.getMessage());
-
+			e.printStackTrace();
 		}
-
 
 		return null;
 
@@ -186,28 +172,103 @@ public class OAuthController {
 	 * @return
 	 */
 	@RequestMapping(path="/token")
-	public ResponseEntity token(HttpServletRequest req){
+	@Produces("application/json")
+	@Consumes("application/x-www-form-urlencoded")
+	public ResponseEntity<Map<String, String>> token(HttpServletRequest req){
+		
+		OAuthTokenRequest request;
+
+				try {
+					request = new OAuthTokenRequest(req);
+					if(request.getGrantType().equalsIgnoreCase("AUTHORIZATION_CODE")){
+						
+						String client_id=request.getClientId();
+						String user_id=request.getParam("user_id");
+						Set<String> scopes=request.getScopes();
+						
+						if(oauthService.isAuthzCodeExist(request.getCode())){
+							
+								String scope=OAuthUtils.convertScopesToScopeStr(scopes);
+								String token=oauthService.addAccessToken(client_id, user_id, scope);
+								
+								// resposne with acess-code
+//								OAuthResponse response=new OAuthTokenResponseBuilder(404)
+//									.setAccessToken(token)
+//									.setExpiresIn(OAuthConstants.ACCESS_TOKEN_TOKEN_EXPIRE_IN)
+//									.setTokenType(TokenType.BEARER.toString())
+//									.setScope("fake_scope")
+//									.buildJSONMessage();
+							
+								Map<String, String> result=new HashMap<>();
+									result.put(OAuth.OAUTH_ACCESS_TOKEN,token);
+									result.put(OAuth.OAUTH_EXPIRES_IN, OAuthConstants.ACCESS_TOKEN_CODE_EXPIRE_IN);
+									result.put(OAuth.OAUTH_TOKEN_TYPE, OAuth.OAUTH_BEARER_TOKEN);
+									//result.put(OAuth.OAUTH_REFRESH_TOKEN, value)
+									result.put(OAuth.OAUTH_CLIENT_ID, request.getClientId());
+									result.put("user_id", request.getParam("user_id"));
+									
+									return new ResponseEntity<Map<String,String>>(result, HttpStatus.OK);
+							}
+							
+							
+						}else{
+							//token not exist or expired
+							
+							//check reason
+							
+							
+						}
+				} catch (OAuthSystemException | OAuthProblemException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+
+
+		
+		
+		return null;
+	}
+	
+	/**
+	 *  use refresh token change for access_token
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(path="/refreshToken")
+	@Consumes("application/x-www-form-urlencoded")
+	@Produces("application/json")
+	public ResponseEntity<Map<String, String>> refreshToken(HttpServletRequest req){
 		
 		OAuthTokenRequest request;
 		try {
 			request = new OAuthTokenRequest(req);
-			
-			if(request.getGrantType().equalsIgnoreCase("AUTHORIZATION_CODE")){
+			if(request.getGrantType().equals(OAuth.OAUTH_REFRESH_TOKEN)){
+				String getRefreshToken=request.getRefreshToken();
 				
-				//validate authorization_code
-				//use redis
+				//refresh_token save in where is properly?
 				
-				// if valid,generate token
+				//search for refresh-token
 				
+				
+				Map<String, String> result=new HashMap<>();
+					result.put(OAuth.OAUTH_ACCESS_TOKEN, "");
+					result.put(OAuth.OAUTH_TOKEN_TYPE, OAuth.OAUTH_BEARER_TOKEN);
+					result.put(OAuth.OAUTH_EXPIRES_IN, OAuthConstants.ACCESS_TOKEN_CODE_EXPIRE_IN);
+					result.put(OAuth.OAUTH_REFRESH_TOKEN, "");
+					result.put(OAuth.OAUTH_SCOPE, "");
+					
+					
+				
+				return new ResponseEntity<Map<String,String>>(result, HttpStatus.OK);
 			}else{
-				logger.log(Level.ERROR, "Error grant type:"+request.getGrantType());
+				
 			}
-			
-		} catch (OAuthSystemException |OAuthProblemException e) {
+		} catch (OAuthSystemException | OAuthProblemException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
+		}
+			
 			
 		
 		
