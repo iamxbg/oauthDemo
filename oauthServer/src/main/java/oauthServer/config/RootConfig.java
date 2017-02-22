@@ -37,8 +37,7 @@ public class RootConfig {
 
 	private static String REDIS_PASSWORD="";
 	private static String REDIS_HOSTNAME="10.244.134.189";
-	private static int REDIS_PORT=6379;
-	private static int REDIS_DATABASE_INDEX=0;
+
 	
 	public RootConfig() {
 		// TODO Auto-generated constructor stub

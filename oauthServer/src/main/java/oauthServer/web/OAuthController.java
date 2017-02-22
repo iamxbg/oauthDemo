@@ -189,15 +189,7 @@ public class OAuthController {
 						if(oauthService.isAuthzCodeExist(request.getCode())){
 							
 								String scope=OAuthUtils.convertScopesToScopeStr(scopes);
-								String token=oauthService.addAccessToken(client_id, user_id, scope);
-								
-								// resposne with acess-code
-//								OAuthResponse response=new OAuthTokenResponseBuilder(404)
-//									.setAccessToken(token)
-//									.setExpiresIn(OAuthConstants.ACCESS_TOKEN_TOKEN_EXPIRE_IN)
-//									.setTokenType(TokenType.BEARER.toString())
-//									.setScope("fake_scope")
-//									.buildJSONMessage();
+								String token=oauthService.addAccessToken(client_id, user_id, scope);	
 							
 								Map<String, String> result=new HashMap<>();
 									result.put(OAuth.OAUTH_ACCESS_TOKEN,token);
@@ -212,10 +204,7 @@ public class OAuthController {
 							
 							
 						}else{
-							//token not exist or expired
-							
-							//check reason
-							
+
 							
 						}
 				} catch (OAuthSystemException | OAuthProblemException e) {
@@ -249,17 +238,15 @@ public class OAuthController {
 				//refresh_token save in where is properly?
 				
 				//search for refresh-token
-				
-				
+
 				Map<String, String> result=new HashMap<>();
 					result.put(OAuth.OAUTH_ACCESS_TOKEN, "");
 					result.put(OAuth.OAUTH_TOKEN_TYPE, OAuth.OAUTH_BEARER_TOKEN);
 					result.put(OAuth.OAUTH_EXPIRES_IN, OAuthConstants.ACCESS_TOKEN_CODE_EXPIRE_IN);
 					result.put(OAuth.OAUTH_REFRESH_TOKEN, "");
 					result.put(OAuth.OAUTH_SCOPE, "");
+
 					
-					
-				
 				return new ResponseEntity<Map<String,String>>(result, HttpStatus.OK);
 			}else{
 				

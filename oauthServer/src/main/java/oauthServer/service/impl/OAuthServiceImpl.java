@@ -2,8 +2,10 @@ package oauthServer.service.impl;
 
 import java.util.List;
 
+import org.apache.oltu.oauth2.as.response.OAuthASResponse;
 import org.apache.oltu.oauth2.as.validator.AuthorizationCodeValidator;
 import org.apache.oltu.oauth2.common.OAuth;
+import org.apache.oltu.oauth2.common.message.OAuthResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class OAuthServiceImpl implements OAuthService{
 
 	@Autowired
 	private OAuthDao oauthDao;
+	
+
 
 	@Override
 	public String addAuthzCode(String client_id, String user_id, String scope) {
@@ -42,6 +46,18 @@ public class OAuthServiceImpl implements OAuthService{
 		oauthDao.saveAccessToken(client_id, value);
 		
 		return value;
+	}
+
+	@Override
+	public boolean isAccessTokenExists(String token) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isAuthzCodeExist(String code) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 

@@ -33,9 +33,7 @@ public class RegistrationController {
 	
 	@RequestMapping(path="")
 	public ModelAndView findAll(ModelAndView mav){
-		
-		//logger.log(Level.INFO, "getRegistrationView");
-		
+
 		logger.log(Priority.INFO, "sdf");
 		
 		List<Registration> rList=rService.findAll();
@@ -46,8 +44,7 @@ public class RegistrationController {
 		mav.setViewName("/registration.jsp");
 		
 		return mav;
-		//return new ResponseEntity<List<Registration>>(rList, HttpStatus.OK);
-		
+
 	}
 	
 	@RequestMapping(path="/add")
@@ -72,12 +69,11 @@ public class RegistrationController {
 			rService.add(r);
 			
 			List<Registration> rList=rService.findAll();
-			
-			//mav.addObject(rList);
+
 			mav.setViewName("/registration");
 			
 			return mav;
-			//return new ResponseEntity<List<Registration>>(rList, HttpStatus.OK);
+
 	}
 	
 	
@@ -87,14 +83,11 @@ public class RegistrationController {
 		logger.log(Level.INFO, "delete registraion---"+id);
 		
 		rService.delete(id);
-		
-		//List<Registration> rList=rService.findAll();
-		
+
 		mav.setViewName("/registration");
-		//mav.addObject("appList", rList);
-		
+
 		return mav;
-		//return new ResponseEntity<>(HttpStatus.OK);
+
 	}
 	
 	public ModelAndView update(@RequestBody Registration r,HttpServletRequest req,ModelAndView mav){
@@ -105,13 +98,11 @@ public class RegistrationController {
 		Registration updated=rService.findById(r.getId());
 		
 		List<Registration> rList=rService.findAll();
-		
-		//mav.addObject("appList", rList);
+
 		mav.setViewName("/registration");
 		
 		return mav;
 		
-		//return new ResponseEntity<Registration>(updated, HttpStatus.OK);
 	}
 
 }

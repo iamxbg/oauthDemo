@@ -55,7 +55,7 @@ public class RootConfig {
 				ps.setProperty("hibernate.format_sql", "true");
 				ps.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
 			lsfb.setHibernateProperties(ps);
-			lsfb.setPackagesToScan("oauthServer.model");
+			lsfb.setPackagesToScan("oauthClient.model");
 			//lsfb.setAnnotatedPackages("oauthServer.model");
 		return lsfb;
 	}
