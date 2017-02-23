@@ -3,20 +3,19 @@ package oauthServer.util;
 public class OAuthAuthzParams {
 
 		private String client_id;
-		private String client_secrect;
 		private String redirect_uri;
-		private String authzEndpoint;
-		private String refreshToken;
 		private String scope;
 		private String responseType;
-		private String idToken;
-		private String idTokenValid;
+		
+		private String user_id;
+		private String username;
+		private String password;
+
 		
 		
 		public OAuthAuthzParams() {
 			// TODO Auto-generated constructor stub
 		}
-
 
 		public String getClient_id() {
 			return client_id;
@@ -27,44 +26,12 @@ public class OAuthAuthzParams {
 			this.client_id = client_id;
 		}
 
-
-		public String getClient_secrect() {
-			return client_secrect;
-		}
-
-
-		public void setClient_secrect(String client_secrect) {
-			this.client_secrect = client_secrect;
-		}
-
-
 		public String getRedirect_uri() {
 			return redirect_uri;
 		}
 
-
 		public void setRedirect_uri(String redirect_uri) {
 			this.redirect_uri = redirect_uri;
-		}
-
-
-		public String getAuthzEndpoint() {
-			return authzEndpoint;
-		}
-
-
-		public void setAuthzEndpoint(String authzEndpoint) {
-			this.authzEndpoint = authzEndpoint;
-		}
-
-
-		public String getRefreshToken() {
-			return refreshToken;
-		}
-
-
-		public void setRefreshToken(String refreshToken) {
-			this.refreshToken = refreshToken;
 		}
 
 
@@ -87,28 +54,36 @@ public class OAuthAuthzParams {
 			this.responseType = responseType;
 		}
 
-
-		public String getIdToken() {
-			return idToken;
+		public String getUser_id() {
+			return user_id;
 		}
 
-
-		public void setIdToken(String idToken) {
-			this.idToken = idToken;
+		public void setUser_id(String user_id) {
+			this.user_id = user_id;
 		}
 
-
-		public String getIdTokenValid() {
-			return idTokenValid;
+		public String getUsername() {
+			return username;
 		}
 
-
-		public void setIdTokenValid(String idTokenValid) {
-			this.idTokenValid = idTokenValid;
+		public void setUsername(String username) {
+			this.username = username;
 		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
 		
-		
-		
+
 		
 		//what about JWT
+		
+		public void validate() throws OAuthParamsException{
+			
+		}
 }

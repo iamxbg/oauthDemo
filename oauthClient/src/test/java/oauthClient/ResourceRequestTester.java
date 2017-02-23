@@ -14,13 +14,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import oauthClient.config.RootConfig;
 
 @ContextConfiguration(classes={RootConfig.class})
-@RunWith(SpringJUnit4ClassRunner.class)
+//@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ResourceRequestTester {
 	
 	private Logger logger=LogManager.getLogger(ResourceRequestTester.class);
@@ -29,6 +32,18 @@ public class ResourceRequestTester {
 	private static String CLIENT_ID="";
 	private static String CLIENT_SERCRECT="";
 	
+	
+	@Test
+	public void requestResourceWithNothing(){
+		
+	}
+	
+	@Test
+	public void requestResourceWithToken(){
+		
+	}
+	
+	/*
 	@Test
 	public void testAskForResource(){
 		
@@ -56,4 +71,5 @@ public class ResourceRequestTester {
 		}
 		
 	}
+	*/
 }

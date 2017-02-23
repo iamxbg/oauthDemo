@@ -10,5 +10,8 @@ public interface OAuthConstants {
 		public static String AUTHORIZATION_CODE_EXPIRE_IN="3600";
 		public static String ACCESS_TOKEN_CODE_EXPIRE_IN="3600";
 		public static String ACCESS_TOKEN_TOKEN_EXPIRE_IN="3600";
+		
+		
+		public static String AUTHORIZTION_URI="http://localhost:8082/oauthServer/authorize";
 //		
 }
