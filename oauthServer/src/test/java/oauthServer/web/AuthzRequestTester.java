@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -42,24 +43,26 @@ public class AuthzRequestTester {
 		this.mvc=MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 	
-	
-	
+
+	/**
+	 *  test pass
+	 * @throws Exception
+	 */
 	@Test
-	public void testAuthorizationRequestWithUsernameAndPassword() throws Exception{
+	public void testAuthorizationRequestWithUsernameAndPassword_Success() throws Exception{
 		
-		String uri=OAuthConstants.AUTHORIZTION_URI;
+		 String uri=OAuthConstants.AUTHORIZTION_URI;
+		 String client_id="chunyuyishen";
+		 String response_type=OAuth.OAUTH_CODE;
+		 String redirect_uri="http://localhost:8081/oauthClient/oauth/receiveAuthzCode";
+		 String scope="faker";
+		 String state="123";
+		 String user_id="1";
 		
-		String client_id="";
-		String response_type="";
-		String redirect_uri="";
-		String scope="";
-		String state="";
+		 String username="wilson";
+		 String password="123456";
+
 		
-		String username="wilson";
-		String password="test123";
-		
-		String err_username="someDude";
-		String err_password="lastavista";
 		
 		HttpHeaders headers=new HttpHeaders();
 			headers.set(OAuth.OAUTH_CLIENT_ID, client_id);
@@ -67,23 +70,57 @@ public class AuthzRequestTester {
 			headers.set(OAuth.OAUTH_REDIRECT_URI, redirect_uri);
 			headers.set(OAuth.OAUTH_SCOPE, scope);
 			headers.set(OAuth.OAUTH_STATE, state);
-		
-			
+
 		this.mvc.perform(
 				get(uri).headers(headers)
-				.content("application/x-www-form-urlencoded")
-				).andExpect(status().is(HttpServletResponse.SC_UNAUTHORIZED)); //401
+					.characterEncoding("utf-8")
+					.contentType("application/x-www-form-urlencoded")
+					.param("user_id", user_id)
+					.param("username", username)
+					.param("password", password)
+				)
+				.andExpect(status().isOk());
+				//.andExpect(content().contentType("application/x-www-form-urlencoded;charset=utf-8"));
+
+	}
+	
+	/**
+	 * test fail wrong username and password
+	 * @throws Exception
+	 */
+	
+	@Test
+	public void testAuthorizationRequestWithUsernameAndPassword_Fail() throws Exception{
 		
+		 String uri=OAuthConstants.AUTHORIZTION_URI;
+		 String client_id="chunyuyishen";
+		 String response_type=OAuth.OAUTH_CODE;
+		 String redirect_uri="http://localhost:8081/oauthClient/fake";
+		 String scope="faker";
+		 String state="123";
+		 String user_id="1";
+		
+		 String username="wilson_dude";
+		 String password="123456";
+
+		
+		
+		HttpHeaders headers=new HttpHeaders();
+			headers.set(OAuth.OAUTH_CLIENT_ID, client_id);
+			headers.set(OAuth.OAUTH_RESPONSE_TYPE, response_type);
+			headers.set(OAuth.OAUTH_REDIRECT_URI, redirect_uri);
+			headers.set(OAuth.OAUTH_SCOPE, scope);
+			headers.set(OAuth.OAUTH_STATE, state);
+
 		this.mvc.perform(
 				get(uri).headers(headers)
-				.param("username", username)
-				.param("password", password)
-				.characterEncoding("utf-8")
-				.contextPath("application/x-www-form-urlencoded")
-				.characterEncoding("utf-8")
-				).andExpect(status().isOk())
-				.andExpect(content().contentType("application/json/charset=utf8"));
-				
+					.characterEncoding("utf-8")
+					.contentType("application/x-www-form-urlencoded")
+					.param("user_id", user_id)
+					.param("username", username)
+					.param("password", password)
+				)
+				.andExpect(status().isOk());
 		
 	}
 	

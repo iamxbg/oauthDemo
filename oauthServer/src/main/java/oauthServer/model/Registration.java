@@ -22,11 +22,11 @@ public class Registration {
 	private Date create_time;
 	private String redirection_uri;
 	private String response_type;
-	
-
+	private String receive_token_uri;
+	private String receive_authz_code_uri;
 
 	public Registration(String name, String client_id, String client_secrect, String description,
-			String redirection_uri, String response_type) {
+			String redirection_uri, String response_type, String receive_token_uri, String receive_authz_code_uri) {
 		super();
 		this.name = name;
 		this.client_id = client_id;
@@ -34,6 +34,8 @@ public class Registration {
 		this.description = description;
 		this.redirection_uri = redirection_uri;
 		this.response_type = response_type;
+		this.receive_token_uri = receive_token_uri;
+		this.receive_authz_code_uri = receive_authz_code_uri;
 	}
 
 
@@ -136,6 +138,30 @@ public class Registration {
 
 	public void setResponse_type(String response_type) {
 		this.response_type = response_type;
+	}
+
+
+
+	public String getReceive_token_uri() {
+		return receive_token_uri;
+	}
+
+
+
+	public void setReceive_token_uri(String receive_token_uri) {
+		this.receive_token_uri = receive_token_uri;
+	}
+
+
+
+	public String getReceive_authz_code_uri() {
+		return receive_authz_code_uri;
+	}
+
+
+
+	public void setReceive_authz_code_uri(String receive_authz_code_uri) {
+		this.receive_authz_code_uri = receive_authz_code_uri;
 	}
 
 

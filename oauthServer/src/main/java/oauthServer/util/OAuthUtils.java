@@ -11,13 +11,15 @@ public class OAuthUtils {
 
 		
 	public static String generateAuthorizationCode(){
-		return UUID.fromString(new SimpleDateFormat().format(new Date())).toString();
+		//return UUID.fromString(new SimpleDateFormat("yyyy-MM-dd ss:dd:hh").format(new Date())).toString();
+		return "FAKE_AUTHZ_CODE";
 	}
 
 	// get the token's sturcture...
 	public static String generateToken(){
-		return new StringBuilder(UUID.randomUUID().toString())
-				.toString();
+//		return new StringBuilder(UUID.randomUUID().toString())
+//				.toString();
+		return "FAKE_TOKEN";
 	}
 	
 	
