@@ -1,20 +1,36 @@
 package oauthServer.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.oltu.oauth2.common.message.types.GrantType;
+import org.apache.oltu.oauth2.common.message.types.TokenType;
+
+import oauthServer.redis.AccessToken;
+import oauthServer.redis.AuthorizationCode;
+import oauthServer.redis.RefreshToken;
 
 public interface OAuthService {
 
-	//authorization-code format
-	// key: client_id:user_id:timestampInMilliseconds
-	// val: HASH_CHARACTERS
+	public void addAuthorizationCode(AuthorizationCode code);
+	
+	public void addAccessToken(AccessToken token);
+	
+	public void addRefreshToken(RefreshToken tokne);
 	
 	
-	public String addAuthzCode(String client_id,String user_id,String scopes);
+	public boolean isAccessTokenExists(String key);
 	
-	public String addAccessToken(String client_id,String user_id,String scopes);
+	public boolean isAuthorizationCodeExist(String key);
 	
-	public boolean isAccessTokenExists(String token);
+	public boolean isRefreshTokenExists(String key);
 	
-	public boolean isAuthzCodeExist(String code);
+	public AccessToken getAccessToken(String key);
+	
+	public AuthorizationCode getAuthorizationCode(String key);
+	
+	public RefreshToken getRefreshToken(String key);
+
 	
 }

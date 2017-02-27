@@ -36,9 +36,9 @@ public class RegistrationDaoImpl implements RegistrationDao{
 	}
 
 	@Override
-	public void add(Registration t) {
+	public int add(Registration t) {
 		// TODO Auto-generated method stub
-		sf.getCurrentSession().save(t);
+		return (Integer)sf.getCurrentSession().save(t);
 		
 	}
 

@@ -32,9 +32,9 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void add(User t) {
+	public int add(User t) {
 		// TODO Auto-generated method stub
-		sf.getCurrentSession().save(t);
+		return (Integer)sf.getCurrentSession().save(t);
 	}
 
 	@Override

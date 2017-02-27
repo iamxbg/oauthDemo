@@ -23,54 +23,71 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<script type='text/javascript' src='<%=basePath%>js/echarts/echarts.js'></script>
 	
 	<style>
+		*{
+			margin:auto 0px;
+			padding:0px;
+		}
 
-		#list{
-			border:1px solid blue;
-		}
-		#add{border:1px solid green;}
+		#list{border:1px solid blue;}
+		#list table{ width:96%;border:1px solid blue;} 
+		#list table tr{line-height:26px;}
+		#list th{font-size: 14px;}
+		#list th span{float:left;margin-left:50px;}
+		#list td{font-size:14px;font-weight: bold;}
 		
-		.registed{
-			margin-top:10px;
-			margin-left:5px;
-		}
+		#registration{border:1px solid lime;}
+		#registration table{width:96%;}
+		#registration table tr{line-height:28px;}
+		#registration th{font-size:14px;}
+		#registration th span{float:left; margin-left:50px;letter-spacing: 4px;}
+		#registration td{font-size:14px;font-weight: bold;}
 		
-		.registed .label{ }
-		.registed .val{}
 	</style>
 	
 </head>
-<body>
+<body ng-app='app'>
 	<b>應用註冊頁面</b>
 	
 	<div id='list'>
-	<div style='margin:20px 0px;'>已註冊應用:</div>
+	<span style='margin:20px 0px;'>已註冊應用:</span>
+		<table  >
+			<colgroup>
+				<col width='30%;'/>
+				<col width='70%;'/>
+			</colgroup>
 			<c:forEach items="${appList}" var='app' >
-			<div>
-			<table class='registed' style='border:1px solid red;'>
-				<tr><td >應用名稱:</td><td >${app.name}</td></tr>
-				<tr><td >應用描述:</td><td >${app.description }</td></tr>
-				<tr><td >應用類型:</td><td >${app.response_type }</td></tr>
-				<tr><td >應用ID:</td><td >${app.client_id }</td></tr>
-				<tr><td >應用密碼:</td><td >${app.client_secrect}</td></tr>
-				<tr><td >重定向地址:</td><td >${app.redirection_uri}</td></tr>
-			</table>
-			<button class='del' id='${app.id}'>刪除</button>
-			</div>
+			<tr><th><span>名稱</span></th><td><input name='name'/>${app.name}</td></tr>
+			<tr><th><span>描述</span></th><td>${app.description }</td></tr>
+			<tr><th><span>應用ID</span></th><td>${app.client_id }</td></tr>
+			<tr><th><span>應用密文</span></th><td><input name='client_secrect'>${app.client_secrect}</td></tr>
+			<tr><th><span>接受驗證的URI</span></th><td><input name='receive_authz_code_uri'/>${app.receive_authz_code_uri}</td></tr>
+			<tr><th><span>接受TOKEN的URI</span></th><td><input name='receive_token_uri'/>${app.receive_token_uri}</td></tr>
+			<!-- <tr><th><span>REDIRECT_URI</span></th><td><input name='redirection_uri'/>${app.redirection_uri}</td></tr>  -->
+			<tr><th><span>IS_CLIENT_AUTHZ_OPEN</span></th><td>${app.is_server_auth_enabled }</td></tr>
+			<tr><th><span>IS_CLIENT_AUTHZ_OPEN</span></th><td>${app.is_client_auth_enabled}</td></tr>
+			<tr><th><span>可用狀態</span></th><td>${app.del_flag}</td></tr>
 			</c:forEach>
-	</div>
-	<div id='add' >
-		<div>註冊新應用:</div>
-		<form action='<%=basePath %>registration/add' method="post">
-			<table>	
-				<tr><td>應用名稱:</td><td><input name='name'/></td></tr>
-				<tr><td>應用描述:</td><td><input name='description'/></td></tr>
-				<tr><td>驗證方式:</td><td><select name='response_type'><option value='code'>授權碼</option><option value='token'>令牌</option></select></td></tr>
-				<tr><td>應用ID:</td><td><input name='client_id'/></td></tr>
-				<tr><td>應用密碼:</td><td><input type='password' name='client_secrect'/></td></tr>
-				<tr><td>重定向地址:</td><td><input name='redirection_uri'/></td></tr>
-				<tr><td><input type='submit' value='提交'/></td></tr>
 			</table>
-		</form>
+			
+	</div>
+	<div id='registration' >
+		<span>註冊新第三方應用</span>
+		<!-- <form action='<%=basePath %>registration/add' method="post">  -->
+			<table id='registration'>	
+				<colgroup>
+					<col width='30%'/>
+					<col width='70%'/>
+				</colgroup>
+				<tr><th><span>名稱</span></th><td><input name='name'/></td></tr>
+				<tr><th><span>描述</span></th><td><input name='description'/></td></tr>
+				<tr><th><span>應用ID</span></th><td><input name='client_id'/></td></tr>
+				<tr><th><span>應用密文</span></th><td><input type='password' name='client_secrect'/></td></tr>
+				<tr><th><span>第三方應用接收驗證票據的URI</span></th><td><input name='redirection_uri'/></td></tr>
+				<tr><th><span>第三方應用接收token的URI</span></th><td><input name='redirection_uri'/></td></tr>
+
+				<tr><th><input type='submit' value='提交'/></td></tr>
+			</table>
+		<!-- </form>  -->
 	</div>
 	
 	
@@ -99,6 +116,29 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			})
 			
 		})
+		
+		
+		var app=angular.module('app',[]);
+		
+		app.
+		
+		//add client
+		
+		//update client
+		
+		//enable client
+		
+		//disable client
+		
+		//open client-auth-flow
+		
+		//close client-auth-flow
+		
+		//open server-auth-flow
+		
+		//close server-auth-flow
+		
+		
 	</script>
 	
 </body>

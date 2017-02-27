@@ -1,27 +1,41 @@
 package oauthServer.redis;
 
 import java.util.List;
+import java.util.Set;
 
 public class AuthorizationCode {
 
 		private String client_id;
 		private String user_id;
-		private String scope;
-		private String expire_in ;
+		private Set<String> scopes;
+		private String expires_in ;
 		private String code;
 		
 		public AuthorizationCode() {
 			// TODO Auto-generated constructor stub
 		}
 
-		public AuthorizationCode(String client_id, String user_id, String scope, String expire_in, String code) {
+
+		public AuthorizationCode(String client_id, String user_id, Set<String> scopes, String expires_in, String code) {
 			super();
 			this.client_id = client_id;
 			this.user_id = user_id;
-			this.scope = scope;
-			this.expire_in = expire_in;
+			this.scopes = scopes;
+			this.expires_in = expires_in;
 			this.code = code;
 		}
+
+
+		
+		public Set<String> getScopes() {
+			return scopes;
+		}
+
+
+		public void setScopes(Set<String> scopes) {
+			this.scopes = scopes;
+		}
+
 
 		public String getClient_id() {
 			return client_id;
@@ -39,20 +53,13 @@ public class AuthorizationCode {
 			this.user_id = user_id;
 		}
 
-		public String getScope() {
-			return scope;
+
+		public String getExpires_in() {
+			return expires_in;
 		}
 
-		public void setScope(String scope) {
-			this.scope = scope;
-		}
-
-		public String getExpire_in() {
-			return expire_in;
-		}
-
-		public void setExpire_in(String expire_in) {
-			this.expire_in = expire_in;
+		public void setExpires_in(String expires_in) {
+			this.expires_in = expires_in;
 		}
 
 		public String getCode() {
@@ -62,13 +69,6 @@ public class AuthorizationCode {
 		public void setCode(String code) {
 			this.code = code;
 		}
-		
-		public String getValue(){
-			return new StringBuilder(client_id)
-						.append(":").append(user_id)
-						.append(":").append(scope)
-						.append(":").append(code).toString();
-		}
-		
+	
 		
 }

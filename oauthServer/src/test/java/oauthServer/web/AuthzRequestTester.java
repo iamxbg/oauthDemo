@@ -45,7 +45,7 @@ public class AuthzRequestTester {
 	
 
 	/**
-	 *  test pass
+	 * test pass
 	 * @throws Exception
 	 */
 	@Test
@@ -80,7 +80,7 @@ public class AuthzRequestTester {
 					.param("password", password)
 				)
 				.andExpect(status().isOk());
-				//.andExpect(content().contentType("application/x-www-form-urlencoded;charset=utf-8"));
+				
 
 	}
 	
@@ -103,8 +103,6 @@ public class AuthzRequestTester {
 		 String username="wilson_dude";
 		 String password="123456";
 
-		
-		
 		HttpHeaders headers=new HttpHeaders();
 			headers.set(OAuth.OAUTH_CLIENT_ID, client_id);
 			headers.set(OAuth.OAUTH_RESPONSE_TYPE, response_type);
@@ -123,5 +121,7 @@ public class AuthzRequestTester {
 				.andExpect(status().isOk());
 		
 	}
+	
+
 	
 }

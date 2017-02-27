@@ -1,25 +1,21 @@
 package oauthServer.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
-
-import org.apache.oltu.oauth2.common.OAuth;
 
 public class OAuthUtils {
 
-		
 	public static String generateAuthorizationCode(){
-		//return UUID.fromString(new SimpleDateFormat("yyyy-MM-dd ss:dd:hh").format(new Date())).toString();
 		return "FAKE_AUTHZ_CODE";
 	}
 
 	// get the token's sturcture...
 	public static String generateToken(){
-//		return new StringBuilder(UUID.randomUUID().toString())
-//				.toString();
 		return "FAKE_TOKEN";
+	}
+	
+	public static String generateRefreshToken(){
+		return "FAKE_REFRESH_TOKEN";
 	}
 	
 	
@@ -31,6 +27,19 @@ public class OAuthUtils {
 		}
 				
 		return scopeBuilder.toString();
+	}
+	
+	public static Set<String> convertScopeStrToScopes(String scopeStr){
+		
+		Set<String> set=new HashSet<>();
+			
+		String[] scopeAry=scopeStr.split(",");
+		
+		for(String scope:scopeAry){
+			if("".equals(scope)) set.add(scope);
+		}
+
+		return set;
 	}
 	
 }

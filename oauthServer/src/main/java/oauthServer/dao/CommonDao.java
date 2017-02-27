@@ -8,7 +8,7 @@ public interface CommonDao <T>{
 	
 	public T findById(int id);
 	
-	public void add(T t);
+	public int add(T t);
 	
 	public void delete(T t);
 	

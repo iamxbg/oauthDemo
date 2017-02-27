@@ -4,10 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import oauthServer.model.Registration;
@@ -29,16 +26,13 @@ public class RegistrationController {
 	@Autowired
 	private RegistrationService rService;
 	
-	private static Logger logger=Logger.getLogger(RegistrationController.class);
 	
-	@RequestMapping(path="")
+	private static Logger logger=LogManager.getLogger(RegistrationController.class);
+	
+	@RequestMapping(path="/view")
 	public ModelAndView findAll(ModelAndView mav){
-
-		logger.log(Priority.INFO, "sdf");
 		
 		List<Registration> rList=rService.findAll();
-		
-		logger.log(org.apache.log4j.Level.INFO, "count:"+rList.size());
 		
 		mav.addObject("appList", rList);
 		mav.setViewName("/registration.jsp");
@@ -48,61 +42,93 @@ public class RegistrationController {
 	}
 	
 	@RequestMapping(path="/add")
-	public ModelAndView add(@RequestParam String name,
-			@RequestParam String client_id,
-			@RequestParam String client_secrect,
-			@RequestParam String description,
-			@RequestParam String redirection_uri,
-			@RequestParam String response_type,
-			ModelAndView mav){
-		
-			logger.log(org.apache.log4j.Level.INFO, "+do registration");
+	public ResponseEntity<Registration> add(@RequestBody Registration r,HttpServletRequest req){
 
-			Registration r=new Registration();
-				r.setClient_id(client_id);
-				r.setClient_secrect(client_secrect);
-				r.setDescription(description);
-				r.setName(name);
-				r.setRedirection_uri(redirection_uri);
-				r.setResponse_type(response_type);
+			Registration reg=new Registration(r.getName(),
+					r.getClient_id(),
+					r.getClient_secrect(),
+					r.getDescription(), 
+					r.getRedirection_uri(),
+					r.getReceive_token_uri(),
+					r.getReceive_authz_code_uri());
 
-			rService.add(r);
+			int id=rService.add(reg);
 			
-			List<Registration> rList=rService.findAll();
-
-			mav.setViewName("/registration");
+			Registration saved=rService.findById(id);
 			
-			return mav;
+			return new ResponseEntity<Registration>(saved, HttpStatus.OK);
 
 	}
 	
 	
-	@RequestMapping(path="/del/{id}")
-	public ModelAndView delete(@PathVariable("id") Integer id,ModelAndView mav){
-		
-		logger.log(Level.INFO, "delete registraion---"+id);
-		
-		rService.delete(id);
+	
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/disable/{id}")
+	public ResponseEntity disable(@PathVariable("id") int id){
 
-		mav.setViewName("/registration");
+		Registration r=rService.findById(id);
+			r.setDel_flag('Y');
+			rService.update(r);
 
-		return mav;
+		return new ResponseEntity<>(HttpStatus.OK);
 
 	}
 	
-	public ModelAndView update(@RequestBody Registration r,HttpServletRequest req,ModelAndView mav){
-		
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/enable/{id}")
+	public ResponseEntity enable(@PathVariable("id") int id){
+		Registration r=rService.findById(id);
+		r.setDel_flag('N');
+		rService.update(r);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@RequestMapping(path="/update")
+	public ResponseEntity<Registration> update(@RequestBody Registration r,HttpServletRequest req,ModelAndView mav){
 		
 		rService.update(r);
-		
 		Registration updated=rService.findById(r.getId());
-		
-		List<Registration> rList=rService.findAll();
 
-		mav.setViewName("/registration");
-		
-		return mav;
-		
+		return new ResponseEntity<Registration>(updated, HttpStatus.OK);
+
+
 	}
 
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/openClientAuthorize?id={id}")
+	public ResponseEntity openClientRegistration(@PathVariable("id") int id,HttpServletRequest req){
+		Registration r=rService.findById(id);
+			r.setIs_client_auth_enabled('Y');
+		rService.update(r);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/openServerAuthorize?id={id}")
+	public ResponseEntity openServerRegistration(@PathVariable("id") int id,HttpServletRequest req){
+		Registration r=rService.findById(id);
+			r.setIs_server_auth_enabled('Y');
+		rService.update(r);
+		return new ResponseEntity<>(HttpStatus.OK);
+		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/closeClientAuthorize?id={id}")
+	public ResponseEntity closeClientRegistration(@PathVariable("id") int id,HttpServletRequest req){
+		Registration r=rService.findById(id);
+			r.setIs_client_auth_enabled('N');
+		rService.update(r);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(path="/closeServerAuthorize?id={id}")
+	public ResponseEntity closeServerRegistration(@PathVariable("id") int id,HttpServletRequest req){
+		Registration r=rService.findById(id);
+			r.setIs_server_auth_enabled('N');
+		rService.update(r);
+		return new ResponseEntity<>(HttpStatus.OK);
+		
+	}
 }

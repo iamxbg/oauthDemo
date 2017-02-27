@@ -30,17 +30,12 @@ public class RegistrationServiceImpl implements RegistrationService{
 	}
 
 	@Override
-	public void add(Registration r) {
+	public int add(Registration r) {
 		// TODO Auto-generated method stub
-		rDao.add(r);
+		return rDao.add(r);
 	}
 
 
-	@Override
-	public void delete(int id) {
-		// TODO Auto-generated method stub
-		rDao.deleteById(id);
-	}
 
 	@Override
 	public void update(Registration r) {
@@ -59,6 +54,8 @@ public class RegistrationServiceImpl implements RegistrationService{
 		// TODO Auto-generated method stub
 		return rDao.findById(id);
 	}
+
+
 	
 	
 

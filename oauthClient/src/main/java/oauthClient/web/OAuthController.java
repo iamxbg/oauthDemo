@@ -2,6 +2,7 @@ package oauthClient.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 
@@ -56,6 +57,26 @@ public class OAuthController {
 
 	private static Logger logger=LogManager.getLogger(OAuthController.class);
 	
+	/**
+	 *  authorization_request
+	 *  	parameters should be  in request:
+	 *  		response_type : <code for server-side>
+	 *  		client_id(required) 
+	 *  		redirect_uri(option) 
+	 *  		scope:(optional)
+	 *  		state:(recommended)
+	 *  	e.g.:
+	 *  			GET /authorize?
+						response_type=code&
+						client_id=s6BhdRkqt3&state=xyz&
+						redirect_uri=https%3A%2F%Eexample%2Ecom%2Fcallback HTTP/1.1
+						Host: server.example.com
+	 *  				
+	 *  	
+	 * @param mav
+	 * @param req
+	 * @return
+	 */
 	@RequestMapping(path="/toAuthzView")
 	@Produces("application/json")
 	@Consumes("application/json")
@@ -72,6 +93,8 @@ public class OAuthController {
 
 	}
 
+	
+	
 	@Consumes("application/json;charset=utf8")
 	@Produces("application/json;charset=utf-8")
 	@RequestMapping(path="/receiveCode")
@@ -129,5 +152,14 @@ public class OAuthController {
 		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
+	
+	@GET
+	@RequestMapping("/redirectView")
+	public ModelAndView redirectUriHandler(ModelAndView mav){
+		mav.setViewName("/redirectView.jsp");
+		return mav;
+	}
+	
+	
 
 }
