@@ -117,7 +117,7 @@ public class OAuthClientController {
 					error_uri(optional)
 	*/
 	
-	
+
 	@Consumes("application/x-www-form-urlencoded")
 	@RequestMapping(path="/authorize")
 	public ModelAndView authorize(HttpServletRequest req,ModelAndView mav){

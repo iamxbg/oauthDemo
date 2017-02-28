@@ -8,10 +8,13 @@ import org.apache.oltu.oauth2.common.OAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.stereotype.Repository;
+
 import oauthServer.dao.RefreshTokenDao;
 import oauthServer.redis.RefreshToken;
 import oauthServer.util.OAuthUtils;
 
+@Repository
 public class RefreshTokenDaoImpl implements RefreshTokenDao {
 	
 	@Autowired
