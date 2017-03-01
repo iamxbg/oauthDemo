@@ -1,15 +1,14 @@
 package oauthServer.exception;
 
-public class OAuthAuthzException extends Exception {
+public class OAuthAuthzViewException extends Exception{
 
-	public OAuthAuthzException() {
+	public OAuthAuthzViewException() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public OAuthAuthzException(String message) {
+	public OAuthAuthzViewException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
-
 
 }

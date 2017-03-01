@@ -33,7 +33,7 @@ public class RefreshTokenDaoImpl implements RefreshTokenDao {
 			Map<String, String> map=new HashMap<>();
 			map.put(OAuth.OAUTH_CLIENT_ID, token.getClient_id());
 			map.put("user_id",token.getUser_id());
-			map.put(OAuth.OAUTH_EXPIRES_IN, token.getExpire_in());
+			map.put(OAuth.OAUTH_EXPIRES_IN, token.getExpires_in());
 			
 			hOps.putAll(token.getToken(), map);
 	}

@@ -3,7 +3,7 @@ package oauthServer.redis;
 import java.util.List;
 import java.util.Set;
 
-public class AccessToken {
+public class AccessToken extends Token{
 
 		private String client_id;
 		private String user_id;
@@ -11,6 +11,7 @@ public class AccessToken {
 		private String expires_in;
 		private String token;
 		
+
 		public AccessToken() {
 			// TODO Auto-generated constructor stub
 		}

@@ -2,30 +2,26 @@ package oauthServer.redis;
 
 import java.util.Set;
 
-import org.apache.oltu.oauth2.common.message.types.TokenType;
+public class Token {
 
-public class RefreshToken extends Token{
-	
 	private String client_id;
 	private String user_id;
+	private Set<String> scopes;
 	private String expires_in;
 	private String token;
-	private Set<String> scopes;
-
-	public RefreshToken() {
+	
+	public Token() {
 		// TODO Auto-generated constructor stub
 	}
 
-
-	public RefreshToken(String client_id, String user_id, String expires_in, String token, Set<String> scopes) {
+	public Token(String client_id, String user_id, Set<String> scopes, String expires_in, String token) {
 		super();
 		this.client_id = client_id;
 		this.user_id = user_id;
+		this.scopes = scopes;
 		this.expires_in = expires_in;
 		this.token = token;
-		this.scopes = scopes;
 	}
-
 
 	public String getClient_id() {
 		return client_id;
@@ -43,11 +39,19 @@ public class RefreshToken extends Token{
 		this.user_id = user_id;
 	}
 
+	public Set<String> getScopes() {
+		return scopes;
+	}
+
+	public void setScopes(Set<String> scopes) {
+		this.scopes = scopes;
+	}
+
 	public String getExpires_in() {
 		return expires_in;
 	}
 
-	public void setExpire_in(String expires_in) {
+	public void setExpires_in(String expires_in) {
 		this.expires_in = expires_in;
 	}
 
@@ -58,17 +62,6 @@ public class RefreshToken extends Token{
 	public void setToken(String token) {
 		this.token = token;
 	}
-
-
-	public Set<String> getScopes() {
-		return scopes;
-	}
-
-
-	public void setScopes(Set<String> scopes) {
-		this.scopes = scopes;
-	}
-	
 	
 	
 

@@ -2,24 +2,23 @@ package oauthServer.util;
 
 public class TokenResponse {
 
-	public TokenResponse() {
-		// TODO Auto-generated constructor stub
-	}
 
 	private String access_token;
 	private String token_type;
 	private String expires_in;
 	private String refresh_token;
 	private String scope;
+	private String state;
 	
 	public TokenResponse(String access_token, String token_type, String expires_in, String refresh_token,
-			String scope) {
+			String scope,String state) {
 		super();
 		this.access_token = access_token;
 		this.token_type = token_type;
 		this.expires_in = expires_in;
 		this.refresh_token = refresh_token;
 		this.scope = scope;
+		this.state=state;
 	}
 	
 	public String getAccess_token() {
@@ -51,6 +50,14 @@ public class TokenResponse {
 	}
 	public void setScope(String scope) {
 		this.scope = scope;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 	
 	
