@@ -1,6 +1,7 @@
 package oauthServer.web;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -43,6 +44,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
@@ -186,6 +188,8 @@ public class ServerSideAuthController {
 	@Produces("application/x-www-form-urlencoded")
 	public ModelAndView authorize(HttpServletRequest req,ModelAndView mav){
 		OAuthAuthzRequest request=null;
+		
+		logger.info("parameter:"+req.getParameter("response_type")+" attribute:"+req.getAttribute("response_type"));
 		MultiValueMap<String, String> headers=new HttpHeaders();
 		try {
 				request=new OAuthAuthzRequest(req);	
@@ -199,47 +203,47 @@ public class ServerSideAuthController {
 				String username=request.getParam("username");
 				String password=request.getParam("password");
 				
+				
+				
+				logger.info("client_id:"+client_id);
+				logger.info("response_type:"+response_type);
+				//logger.info("scopes:"+scopesStr);
+				logger.info("state:"+state);
+				logger.info("user_id:"+user_id);
+				logger.info("username:"+username);
+				logger.info("password:"+password);
+//				
+//				Set<String> scopes=OAuthUtils.convertScopeStrToScopes(scopesStr);
+				
 				Registration reg_client=regService.findByClientId(client_id);
+				if(reg_client==null)
+					throw new OAuthAuthzException("Client not registed!");
+				if(reg_client.getIs_server_auth_enabled()=='N')
+					throw new OAuthAuthzException("client is disabled!");
 				
 				String receive_authcode_uri=reg_client.getReceive_authz_code_uri();
 				
 				User user=userService.findByUsernameAndPassword(username, password);
 				
 				if(user!=null && user.getId()==Integer.parseInt(user_id)){
-					
-					// add scope utils later!
-					
 					String auth_code="FAKE_AUTH_CODE";
 					
 					AuthorizationCode code=new AuthorizationCode(client_id, user_id, scopes, OAuthConstants.AUTHORIZATION_CODE_EXPIRES_IN, auth_code);
 					//save code to redis
 					oauthService.addAuthorizationCode(code);
 					
-					List<Header> http_headers=new ArrayList<>();
-		
-						Header header=new BasicHeader("state",state);
-						http_headers.add(header);
-						
-					CloseableHttpClient client=HttpClients.custom()
-													.setConnectionManager(httpClientUtil.getManager())
-													.setDefaultHeaders(http_headers).build();
+					CloseableHttpResponse clientResp=sendAuthzCodeToClient(code, receive_authcode_uri, state);
 					
-					HttpPost post=new HttpPost(new URI(receive_authcode_uri));
-		
-						JSONObject jsonObj=new JSONObject(code);
-						
-						post.setEntity(new StringEntity(jsonObj.toString(), Charset.forName("UTF-8")));
-					CloseableHttpResponse resp=client.execute(post);
-					
-					if(resp.getStatusLine().getStatusCode()==HttpServletResponse.SC_OK){
+					if(clientResp.getStatusLine().getStatusCode()==HttpServletResponse.SC_OK){
 						
 						mav.setStatus(HttpStatus.OK);
 						mav.setViewName(redirect_uri);
 						
 						return mav;
 					}else
-						throw new OAuthAuthzException("send auth-code error, error-code:"+resp.getStatusLine().getStatusCode()+" error-description:"+resp.getStatusLine().getReasonPhrase());
-
+						throw new OAuthAuthzException("send auth-code error, error-code:"+clientResp.getStatusLine().getStatusCode()+" error-description:"+clientResp.getStatusLine().getReasonPhrase());
+					
+					
 				}else{
 					throw new OAuthAuthzException("user authentication failed!");
 				}
@@ -250,12 +254,39 @@ public class ServerSideAuthController {
 				//some error occurs
 				mav.addObject("error", e.getClass().getSimpleName());
 				mav.setStatus(HttpStatus.BAD_REQUEST);
-				mav.setViewName(OAuthConstants.AUTHORIZATION_PAGE);
+				//mav.setViewName(OAuthConstants.AUTHORIZATION_PAGE);
+				mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE));
 				mav.addObject("error-description", e.getMessage());
 				return mav; 
 
 		}
 		
+	}
+	
+	
+	public CloseableHttpResponse sendAuthzCodeToClient(AuthorizationCode auth_code,String receive_authcode_uri,String state) throws URISyntaxException, ClientProtocolException, IOException{
+		// add scope utils later!
+		
+		List<Header> http_headers=new ArrayList<>();
+
+			Header header=new BasicHeader("state",state);
+			http_headers.add(header);
+			
+		CloseableHttpClient client=HttpClients.custom()
+										.setConnectionManager(httpClientUtil.getManager())
+										.setDefaultHeaders(http_headers).build();
+		
+		HttpPost post=new HttpPost(new URI(receive_authcode_uri));
+			
+			post.setHeader("content-type", "application/json;charset=utf-8");
+			JSONObject jsonObj=new JSONObject(auth_code);
+			
+			logger.info("@send code to client: jsonObj"+jsonObj);
+			
+			post.setEntity(new StringEntity(jsonObj.toString(), Charset.forName("UTF-8")));
+		
+			return client.execute(post);
+
 	}
 
 	/**
@@ -294,12 +325,18 @@ public class ServerSideAuthController {
 				
 				if(!grant_type.equalsIgnoreCase(GrantType.AUTHORIZATION_CODE.name()))
 					throw new OAuthTokenException("grant type must be AUTHORIZATION_CODE ,incase-sensitive!");
-				if(reg_client.getIs_server_auth_enabled()!='Y')
-						//trhow exception...
+				if(reg_client.getIs_server_auth_enabled()!='Y'){
+					//trhow exception...
+					logger.error("client-server is disabled!");
 					throw new OAuthTokenException("client-server is disabled!");
-				if(!(reg_client!=null && client_id.equals(reg_client.getClient_id()) && client_secrect.equals(reg_client.getClient_secrect())) )
-						//throw client validate exception, fata
+				}
+						
+				if(!(reg_client!=null && client_id.equals(reg_client.getClient_id()) && client_secrect.equals(reg_client.getClient_secrect())) ){
+					//throw client validate exception, fata
+					logger.error("client-server validate fail!");
 					throw new OAuthTokenException("client-server validate fail!");
+				}
+					
 					
 				//check code in redis
 				AuthorizationCode authCode=oauthService.getAuthorizationCode(code);
@@ -309,6 +346,7 @@ public class ServerSideAuthController {
 					Set<String> realScope=authCode.getScopes();
 					for(String scope:scopes){
 						if(!realScope.contains(scope)){
+							logger.error("scope not allowed:"+scope);
 							throw new OAuthTokenException("scope not allowed:"+scope);
 						}
 					}
@@ -324,10 +362,12 @@ public class ServerSideAuthController {
 						tokens.add(rToken);
 						
 						headers.add("state", state);
+					logger.error("status OK *");
 					return new ResponseEntity<List<Token>>(tokens, headers, HttpStatus.OK);
 					
 				}else{
 					//throw user validate fail!
+					logger.error("user authorizacation fail!");
 					throw new OAuthTokenException("user authotication fail!");
 				}
 			} catch (OAuthSystemException | OAuthTokenException | OAuthProblemException e) {
@@ -335,6 +375,7 @@ public class ServerSideAuthController {
 				e.printStackTrace();
 				headers.add("error", e.getClass().getSimpleName());
 				headers.add("error-description", e.getMessage());
+				logger.error("error-description:"+e.getMessage());
 				return new ResponseEntity<>(headers,HttpStatus.BAD_REQUEST);
 			} 
 

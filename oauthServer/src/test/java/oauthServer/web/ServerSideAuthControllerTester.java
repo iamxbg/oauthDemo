@@ -16,6 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,7 +52,7 @@ public class ServerSideAuthControllerTester {
 		// TODO Auto-generated constructor stub
 	}
 	
-	@Test
+	//@Test
 	public void testForAuthView() throws Exception{
 
 		//redirect view has no model and view! is null!
@@ -60,14 +61,41 @@ public class ServerSideAuthControllerTester {
 					).andExpect(status().isOk());
 		
 	}
+	/**
+	response_type : must be code
+	 * 				client_id:  must exists
+	 * 				redirect_uri: 	if all pass , redirect user to redirectView finally.
+	 * 				scope: 	(optional)
+	 * 				state: (recommended)  
+	 * 
+	 * 				custom-defined:(user_id,username,password)
+	 * @throws Exception 
+	 * */
+	@Test
+	public void testAuthorize() throws Exception{
+		logger.info("POST:"+SSA_AUTHORIZE_URI);
+		
+		String client_id="test_client_id";
+		String redirect_uri="test_redirect_uri";
+		String scope="test_scope";
+		String state="test_state";
+		
+		String user_id="test_user_id";
+		String username="test_username";
+		String password="test_password";
+		
+		mvc.perform(post(SSA_AUTHORIZE_URI)
+				.param("client_id", client_id)
+				.param("redirect_uri", redirect_uri)
+				.param("scope", scope)
+				.param("state", state)
+				.param("user_id", user_id)
+				.param("username", username)
+				.param("password", password))
+			.andExpect(redirectedUrl(redirect_uri));
+	}
 	
-//	@Test
-//	public void testAuthorize(){
-//		logger.info("POST:"+SSA_AUTHORIZE_URI);
-//		mvc.perform(post(SSA_AUTHORIZE_URI)
-//					.
-//				)
-//		
-//	}
+	
+
 
 }

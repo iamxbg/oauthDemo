@@ -41,6 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import static oauthClient.util.OAuthUtils.*;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -93,45 +94,49 @@ public class OAuthController {
 
 	}
 
-	
-	
-	@Consumes("application/json;charset=utf8")
-	@Produces("application/json;charset=utf-8")
+	/**
+	 *  requestParamters:
+	 *  		code
+	 *  		state 
+	 * @param map
+	 * @param req
+	 * @return
+	 */
+	@POST
+	@Consumes("application/json;charset=utf-8")
+	@Produces("application/json;charset=utf8")
 	@RequestMapping(path="/receiveCode")
-	public ResponseEntity receiveCode(HttpServletRequest req){
+	public ResponseEntity receiveCode(@RequestBody Map<String, Object> map,HttpServletRequest req){
 		
-		try {
-			OAuthAuthzResponse response=OAuthAuthzResponse.oauthCodeAuthzResponse(req);
-				String code=response.getCode();
-				String state=response.getState();
+		logger.info("client@receiveCode map:"+map.toString());
+
+			
+			String code1=(String)map.get("code");
+			String state=(String)map.get("state");
+			
+			logger.info("Logger! code:"+code1);
+			ArrayList<String> scopes=(ArrayList<String>) map.get("scopes");
+			logger.info("scope-0:"+scopes.get(0));
+
+				logger.info("code:"+code1);
+				logger.info("state:"+scopes);
 				
-				logger.info("code:"+code);
-				logger.info("state:"+state);
-				
-				//grant_type
-				//code
-				//redirect_uri
-				//client_id
+
 				
 				String client_id="chunyuyishen";
-				String redirect_uri="http://localhost:8082/oauthServer/oauth/token";
+				String redirect_uri="https://localhost:8443/oauthServer/ssa/token";
 				
 				Map<String, String> requestParams=new HashMap<>();
 					requestParams.put(OAuth.OAUTH_GRANT_TYPE, GrantType.AUTHORIZATION_CODE.name());
-					requestParams.put(OAuth.OAUTH_CODE, code);
+					requestParams.put(OAuth.OAUTH_CODE, code1);
 					requestParams.put(OAuth.OAUTH_REDIRECT_URI, redirect_uri);
 					requestParams.put(OAuth.OAUTH_CLIENT_ID, client_id);
 					requestParams.put(OAuth.OAUTH_CLIENT_SECRET, "123456");
 					
 				return new ResponseEntity(requestParams, HttpStatus.OK);
 
-				
-		} catch (OAuthProblemException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-		
+
+
 	}
 	
 	

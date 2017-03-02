@@ -46,15 +46,16 @@ public interface OAuthConstants {
 		
 		public static String SSA_AUTHORIZE_URI=new StringBuilder(scheme_SSL)
 									.append("://").append(hostname)
-									.append("/").append(app_name)
 									.append(":").append(ssl_port)
+									.append("/").append(app_name)
+									
 									.append("/").append(auth_type_server_path)
 									.append("/").append(authorize_uri).toString();
 		
 		public static String SSA_REFRESH_TOKEN_URI=new StringBuilder(scheme_SSL)
 								.append("://").append(hostname)
-								.append("/").append(app_name)
 								.append(":").append(ssl_port)
+								.append("/").append(app_name)
 								.append("/").append(auth_type_server_path)
 								.append("/").append(refresh_token_uri).toString();
 		
@@ -62,15 +63,15 @@ public interface OAuthConstants {
 		
 		public static String CSA_AUTHORIZTION_VIEW_URI=new StringBuilder(scheme_SSL)
 				.append("://").append(hostname)
-				.append("/").append(app_name)
 				.append(":").append(ssl_port)
+				.append("/").append(app_name)
 				.append("/").append(auth_type_client_path)
 				.append("/").append(auth_view_uri).toString();
 		
 		public static String CSA_AUTHORIZE_URI=new StringBuilder(scheme_SSL)
 				.append("://").append(hostname)
-				.append("/").append(app_name)
 				.append(":").append(ssl_port)
+				.append("/").append(app_name)		
 				.append("/").append(auth_type_client_path)
 				.append("/").append(authorize_uri).toString();
 
