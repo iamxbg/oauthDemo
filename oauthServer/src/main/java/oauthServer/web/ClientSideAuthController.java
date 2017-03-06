@@ -18,12 +18,30 @@ import org.apache.oltu.oauth2.common.message.types.TokenType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
-import oauthServer.model.User;
-import oauthServer.service.UserService;
+
+import com.foxconn.model.FamilyAccount;
+import com.foxconn.model.FamilyMembers;
+import com.foxconn.model.MembersInfo;
+import com.foxconn.service.AccountService;
+
+import oauthServer.exception.OAuthAuthzException;
+import oauthServer.model.Client;
+import oauthServer.service.ClientService;
+import oauthServer.service.OAuthService;
+import oauthServer.service.ServiceService;
 import oauthServer.util.OAuthConstants;
+import oauthServer.util.OAuthUtils;
+import oauthServer.util.ServiceParam;
+import oauthServer.util.ServiceType;
+
+import static oauthServer.util.OAuthConstants.*;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/csa")
@@ -32,7 +50,14 @@ public class ClientSideAuthController {
 	private Logger logger=LogManager.getLogger(ClientSideAuthController.class);
 
 	@Autowired
-	private UserService userService;
+	private OAuthService oService;
+	@Autowired
+	private AccountService accService;
+	@Autowired
+	private ServiceService serService;
+	@Autowired
+	private ClientService cliService;
+
 	
 	public ClientSideAuthController() {
 		// TODO Auto-generated constructor stub
@@ -67,19 +92,16 @@ public class ClientSideAuthController {
 			OAuthAuthzRequest authzReq=new OAuthAuthzRequest(req);
 				
 			
-				mav.addObject(OAuth.OAUTH_CLIENT_ID, authzReq.getClientId());
-				mav.addObject(OAuth.OAUTH_REDIRECT_URI, authzReq.getRedirectURI());
-				mav.addObject(OAuth.OAUTH_STATE, authzReq.getState());
-				mav.addObject(OAuth.OAUTH_RESPONSE_TYPE, OAuth.OAUTH_CODE);
-				mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE));
-				
+				mav.addObject(CLIENT_ID, authzReq.getClientId());
+				mav.addObject(REDIRECT_URI, authzReq.getRedirectURI());
+				mav.addObject(STATE, authzReq.getState());
+				mav.addObject(RESPONSE_TYPE, CODE);
+				mav.setView(new RedirectView(AUTHORIZATION_PAGE));
 				return mav;
+				
 		} catch (OAuthSystemException|OAuthProblemException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.log(Level.ERROR, e.getMessage());
-			mav.addObject("error", e.getClass().getSimpleName());
-			mav.addObject("error-description", e.getMessage());
+			mav.addObject(ERROR_DESCRIPTION, e.getMessage());
 			mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE));
 			return mav;
 		} 
@@ -123,47 +145,78 @@ public class ClientSideAuthController {
 	@RequestMapping(path="/authorize")
 	public ModelAndView authorize(HttpServletRequest req,ModelAndView mav){
 		
-		OAuthAuthzRequest request;
+		
 		try {
-			request = new OAuthAuthzRequest(req);
+			OAuthAuthzRequest request = new OAuthAuthzRequest(req);
 
 			String redirect_uri=request.getRedirectURI();
 
 			String state=request.getState();
 			
-			String username=request.getParam("username");
-			String password=request.getParam("password");
+			String service_id=request.getParam(SERVICE_ID);
+			String client_id=request.getParam(CLIENT_ID);
+
+			//-------------------------------------
 			
-			User u=userService.findByUsernameAndPassword(username, password);
+			oauthServer.model.Service service=serService.findByService_id(service_id);
+			Client client=cliService.findByClient_id(client_id);
+			if(service==null) throw new OAuthAuthzException(ERROR_SERVICE_NOT_EXISTS);
+			if(client!=null) throw new OAuthAuthzException(ERROR_CLIENT_NOT_EXISTS);
+			 
+			int service_id_int=service.getId();
+			int client_id_int=client.getId();
 			
-			//if validate pass, redirect user view with token
-			if(u!=null){
-				String access_token="FAKE_ACCESS_TOKEN";
+			String user_id=request.getParam(USER_ID);
+			
+			
+			int user_id_int=Integer.parseInt(user_id);
+
+			
+			if(service_id==ServiceType.TF02){
+
 				
-				mav.addObject(OAuth.OAUTH_ACCESS_TOKEN, access_token);
-				mav.addObject(OAuth.OAUTH_TOKEN_TYPE, TokenType.BEARER.name());
-				mav.addObject(OAuth.OAUTH_EXPIRES_IN, OAuthConstants.ACCESS_TOKEN_TOKEN_EXPIRES_IN);
-				mav.addObject(OAuth.OAUTH_STATE, state);
-				mav.setView(new RedirectView(redirect_uri, false));
+				String tel=request.getParam(TEL);
+				String password=request.getParam(PASSWORD);
+
+				FamilyAccount fa=accService.getFamilyAccountByTelAndPassword(tel, password);
 				
-				return mav;
-			}else{
-				logger.error("user authorization not pass");
-				mav.addObject("error","user authorization not passed!");
-				mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE, false));
-				return mav;
+				List<FamilyMembers> miList=accService.findMembersInfoByFamilyId(fa.getId());
+				
+				boolean authSuccess=false;
+				
+				for(FamilyMembers fm:miList){
+					if(Integer.parseInt(fm.getMemberId())==user_id_int){
+						authSuccess=true;
+						break;
+					}
+				}
+			
+				if(authSuccess){
+
+					String access_token= oService.addAccessToken_token(service_id_int, client_id_int, user_id_int);
+					
+					mav.addObject(ACCESS_TOKEN, access_token);
+					mav.addObject(TOKEN_TYPE, TokenType.BEARER.name());
+					mav.addObject(EXPIRES_IN, ACCESS_TOKEN_TOKEN_EXPIRES_IN);
+					mav.addObject(STATE, state);
+					mav.setView(new RedirectView(redirect_uri, false));
+					
+					return mav;
+					
+				}else throw new OAuthAuthzException(ERROR_AUTHORIZE_FAIL);
+				
 			}
+
 			
 			
-		} catch (OAuthSystemException | OAuthProblemException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.error(e.getMessage());
-			mav.addObject("error",e.getClass().getSimpleName());
-			mav.addObject("error-description", e.getMessage());
-			mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE, false));
+		} catch (OAuthSystemException | OAuthProblemException |NoSuchAlgorithmException | OAuthAuthzException e) {
+
+			mav.addObject(ERROR_DESCRIPTION, e.getMessage());
+			mav.setView(new RedirectView(AUTHORIZATION_PAGE, false));
 			return mav;
-		} 
+		}
+	
+			return null;
 			
 			
 		

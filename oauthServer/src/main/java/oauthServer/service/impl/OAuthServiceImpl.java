@@ -1,105 +1,203 @@
 package oauthServer.service.impl;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.oltu.oauth2.as.response.OAuthASResponse;
-import org.apache.oltu.oauth2.as.validator.AuthorizationCodeValidator;
-import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.message.OAuthResponse;
-import org.apache.oltu.oauth2.common.message.types.GrantType;
+import org.apache.oltu.oauth2.as.request.OAuthUnauthenticatedTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
-import oauthServer.dao.AuthorizationCodeDao;
-import oauthServer.dao.RefreshTokenDao;
-import oauthServer.dao.TokenDao;
-import oauthServer.redis.AccessToken;
-import oauthServer.redis.AuthorizationCode;
-import oauthServer.redis.RefreshToken;
 import oauthServer.service.OAuthService;
 import oauthServer.util.OAuthConstants;
 import oauthServer.util.OAuthUtils;
 
 @Service
-public class OAuthServiceImpl implements OAuthService{
-
+public class OAuthServiceImpl implements OAuthService {
+	
+	public  static String REFRESH_TOKEN_KEY_LABEL="rftkn";
+	public  static String ACCESS_TOKEN_KEY_LABEL="tkn";
+	public  static String AUTHZ_CODE_KEY_LABEL="ac";
+	public  static String SCOPE_KEY_LABEL="scp";
+	public  static String OPENID_TOKEN_KEY_LABEL="oit"; 
+	
+	public OAuthServiceImpl() {
+		// TODO Auto-generated constructor stub
+	}
+	
 	@Autowired
-	private TokenDao tokenDao;
-	@Autowired
-	private AuthorizationCodeDao codeDao;
-	@Autowired
-	private RefreshTokenDao rtDao;
+	private RedisOperations<String, String> oprs;
+	
+	@Override
+	public String addAuthorizationCode(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(AUTHZ_CODE_KEY_LABEL)
+			.append(":").append(service_id)
+			.append(":").append(client_id)
+			.append(":").append(user_id)
+			.toString();
+		String value=OAuthUtils.generateUUID();
+		
+		ValueOperations<String,String> valOps=oprs.opsForValue();
+			valOps.set(key, value,OAuthConstants.AUTHORIZATION_CODE_EXPIRES_IN,TimeUnit.SECONDS);
+			
+			return value;
+	}
+
+	@Override
+	public String addAccessToken_code(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+			String value=OAuthUtils.generateUUID();
+			
+			ValueOperations<String,String> valOps=oprs.opsForValue();
+				valOps.set(key, value,OAuthConstants.ACCESS_TOKEN_CODE_EXPIRES_IN,TimeUnit.SECONDS);
+
+				return value;
+	}
+	
+	@Override
+	public String addAccessToken_token(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+		
+			String value=OAuthUtils.generateUUID();
+			
+			ValueOperations<String,String> valOps=oprs.opsForValue();
+				valOps.set(key, value,OAuthConstants.ACCESS_TOKEN_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+	
+				return value;
+	}
 	
 
 	@Override
-	public boolean isAccessTokenExists(String token) {
+	public String addRefreshToken(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		return tokenDao.isTokenExists(token);
-	}
-
-
-	@Override
-	public boolean isRefreshTokenExists(String key) {
-		// TODO Auto-generated method stub
-		return rtDao.isRefreshTokenExists(key);
-	}
-
-
-	@Override
-	public void addAuthorizationCode(AuthorizationCode code) {
-		// TODO Auto-generated method stub
-		 codeDao.saveAuthorizationCode(code);;
+		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+			String value=OAuthUtils.generateUUID();
+			
+			ValueOperations<String,String> valOps=oprs.opsForValue();
+				valOps.set(key, value,OAuthConstants.REFRESH_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+				
+				return value;
 	}
 
 	@Override
-	public void addAccessToken(AccessToken token) {
+	public String getAccessToken(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		tokenDao.saveAccessToken(token);
-	}
+		
+		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+					
+		ValueOperations<String,String> valOps=oprs.opsForValue();
+		return valOps.get(key);
 
-
-	@Override
-	public void addRefreshToken(RefreshToken token) {
-		// TODO Auto-generated method stub
-		rtDao.saveRefreshToken(token);
-	}
-	
-
-	@Override
-	public boolean isAuthorizationCodeExist(String key) {
-		// TODO Auto-generated method stub
-		return codeDao.isAuthorizationCodeExists(key);
 	}
 
 	@Override
-	public AccessToken getAccessToken(String key) {
+	public String getAuthorizationCode(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		return tokenDao.findByKey(key);
+		String key=new StringBuilder(AUTHZ_CODE_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+					
+		ValueOperations<String,String> valOps=oprs.opsForValue();
+		return valOps.get(key);
 	}
 
 	@Override
-	public AuthorizationCode getAuthorizationCode(String key) {
+	public String getRefreshToken(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		return codeDao.findByKey(key);
+		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+					
+		ValueOperations<String,String> valOps=oprs.opsForValue();
+		return valOps.get(key);
 	}
 
 	@Override
-	public RefreshToken getRefreshToken(String key) {
+	public Set<String> getScopes(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		return rtDao.findByKey(key);
+		String key=new StringBuilder(SCOPE_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+		
+		SetOperations<String, String> setOps=oprs.opsForSet();
+		return setOps.members(key);
+
 	}
 
+	@Override
+	public void setScope(int service_id, int client_id, int user_id, Set<String> scopes) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(SCOPE_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+		
+		SetOperations<String, String> setOps=oprs.opsForSet();
+			for(String scp:scopes){
+				setOps.add(key, scp);
+			}
+			
+			
+		}
 
+	@Override
+	public String getOpenIdAuthToken(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(OPENID_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+					
+		ValueOperations<String,String> valOps=oprs.opsForValue();
+		return valOps.get(key);
+	}
 
+	@Override
+	public String addOpenIdAuthToken(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+			String value=OAuthUtils.generateUUID();
+			
+			ValueOperations<String,String> valOps=oprs.opsForValue();
+				valOps.set(key, value,OAuthConstants.OPENID_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+				
+				return value;
+	}
+		
 
-	
-
-	
-
-	
 
 
 }

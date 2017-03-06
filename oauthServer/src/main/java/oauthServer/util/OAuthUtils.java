@@ -2,23 +2,10 @@ package oauthServer.util;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 public class OAuthUtils {
 
-	public static String generateAuthorizationCode(){
-		return "FAKE_AUTHZ_CODE";
-	}
-
-	// get the token's sturcture...
-	public static String generateToken(){
-		return "FAKE_TOKEN";
-	}
-	
-	public static String generateRefreshToken(){
-		return "FAKE_REFRESH_TOKEN";
-	}
-	
-	
 	public static String convertScopesToScopeStr(Set<String> scopes){
 		StringBuilder scopeBuilder=new StringBuilder();
 		for(String s:scopes){
@@ -40,6 +27,10 @@ public class OAuthUtils {
 		}
 
 		return set;
+	}
+	
+	public static String generateUUID(){
+		return UUID.randomUUID().toString();
 	}
 	
 }

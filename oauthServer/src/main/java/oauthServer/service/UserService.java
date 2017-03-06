@@ -1,18 +1,13 @@
 package oauthServer.service;
 
-import java.util.List;
-
 import oauthServer.model.User;
 
 public interface UserService {
 
-	public void add(User u);
 	
-	public User findByUsernameAndPassword(String username,String password);
+	public User findById(int id);
 	
-	public List<User> findAll();
+	public User findByOpenId(String openId);
 	
-	public void delete(int id);
-	
-	public void update(User u);
+	public User findByUid(int uid);
 }

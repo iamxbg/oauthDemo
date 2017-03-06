@@ -1,5 +1,6 @@
 package oauthServer.config;
 
+import java.io.IOException;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -17,8 +18,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBuilder;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import com.foxconn.service.AccountService;
 
 import redis.clients.jedis.JedisPoolConfig;
 
@@ -37,6 +41,8 @@ public class RootConfig {
 
 	private static String REDIS_PASSWORD="";
 	private static String REDIS_HOSTNAME="10.244.134.189";
+	
+		
 
 	
 	public RootConfig() {
@@ -51,7 +57,6 @@ public class RootConfig {
 			ds.setUsername(USERNAME);
 			ds.setUrl(URI);
 			return ds;
-		
 	}
 	
 	@Bean
@@ -101,4 +106,24 @@ public class RootConfig {
 		RedisTemplate< String, String> template=new StringRedisTemplate(jedisConnectionFactory());
 		return template;
 	}
+	
+	
+	/**
+	 * @return
+	 * @throws IOException 
+	 */
+	@Bean
+	public HttpInvokerProxyFactoryBean httpInvokerProxy() throws IOException{
+		
+		Properties props=new Properties();
+			props.load(this.getClass().getClassLoader().getResourceAsStream("remoting.properties"));
+
+		HttpInvokerProxyFactoryBean factoryBean=new HttpInvokerProxyFactoryBean();
+			factoryBean.setServiceUrl(props.getProperty("tf02.serviceUrl"));
+			factoryBean.setServiceInterface(AccountService.class);
+			
+			return factoryBean;
+	}
+	
+
 }

@@ -1,52 +1,39 @@
 package oauthServer.service.impl;
 
-import java.util.List;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import oauthServer.dao.UserDao;
 import oauthServer.model.User;
 import oauthServer.service.UserService;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
 	@Autowired
-	private UserDao userDao;
+	private UserService userService;
 	
-	@Override
-	public void add(User u) {
-		// TODO Auto-generated method stub
-		userDao.add(u);
-	}
-	
-	public List<User> findAll(){
-		return userDao.findAll();
+	public UserServiceImpl() {
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public User findByUsernameAndPassword(String username, String password) {
+	public User findById(int id) {
 		// TODO Auto-generated method stub
-		return userDao.findByUsernameAndPassword(username, password);
+		return userService.findById(id);
 	}
 
 	@Override
-	public void delete(int id) {
+	public User findByOpenId(String openId) {
 		// TODO Auto-generated method stub
-		 userDao.deleteById(id);;
+		return userService.findByOpenId(openId);
 	}
 
 	@Override
-	public void update(User u) {
+	public User findByUid(int uid) {
 		// TODO Auto-generated method stub
-		userDao.update(u);
+		return userService.findByUid(uid);
 	}
-	
-	
-
 
 }

@@ -1,7 +1,9 @@
 package oauthServer.config;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletRegistration.Dynamic;
 
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
@@ -35,4 +37,7 @@ public class init extends AbstractAnnotationConfigDispatcherServletInitializer{
 			return new Filter[]{ filter };
 	}
 
+
+
+	
 }

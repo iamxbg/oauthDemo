@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
-
+import static oauthServer.util.OAuthConstants.*;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -50,27 +51,32 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foxconn.model.FamilyAccount;
+import com.foxconn.model.FamilyMembers;
+import com.foxconn.service.AccountService;
 
 import oauthServer.exception.OAuthAuthzException;
 import oauthServer.exception.OAuthRefreshTokenException;
 import oauthServer.exception.OAuthTokenException;
-import oauthServer.model.Registration;
+import oauthServer.model.Client;
+import oauthServer.model.Service;
 import oauthServer.model.User;
-import oauthServer.model.tool.RefreshTokenRequestParams;
-import oauthServer.redis.AccessToken;
-import oauthServer.redis.AuthorizationCode;
-import oauthServer.redis.RefreshToken;
-import oauthServer.redis.Token;
+import oauthServer.service.ClientService;
 import oauthServer.service.OAuthService;
-import oauthServer.service.RegistrationService;
+import oauthServer.service.ServiceService;
 import oauthServer.service.UserService;
 import oauthServer.util.AuthorizeResponse;
 import oauthServer.util.HttpClientUtil;
 import oauthServer.util.OAuthConstants;
 import oauthServer.util.OAuthUtils;
+import oauthServer.util.ServiceType;
 import oauthServer.util.TokenResponse;
 
 @Controller
@@ -80,17 +86,20 @@ public class ServerSideAuthController {
 	private static Logger logger=LogManager.getLogger();
 
 	@Autowired
-	private UserService userService;
-	@Autowired
-	private RegistrationService regService;
-	@Autowired
 	private OAuthService oauthService;
 	@Autowired
 	private HttpClientUtil httpClientUtil;
+	@Autowired
+	private AccountService accService;
+	@Autowired
+	private ServiceService serService;
+	@Autowired
+	private ClientService cliService;
 	
 	public ServerSideAuthController() {
 		// TODO Auto-generated constructor stub
 	}
+
 
 	@GET
 	@RequestMapping(path="/authView")
@@ -100,22 +109,20 @@ public class ServerSideAuthController {
 			
 			    OAuthAuthzRequest authzReq=new OAuthAuthzRequest(req);
 
-				mav.addObject(OAuth.OAUTH_CLIENT_ID, authzReq.getClientId());
-				mav.addObject(OAuth.OAUTH_REDIRECT_URI, authzReq.getRedirectURI());
-				mav.addObject(OAuth.OAUTH_STATE, authzReq.getState());
-				mav.addObject(OAuth.OAUTH_RESPONSE_TYPE, OAuth.OAUTH_CODE);
+				mav.addObject(CLIENT_ID, authzReq.getClientId());
+				mav.addObject(REDIRECT_URI, authzReq.getRedirectURI());
+				mav.addObject(STATE, authzReq.getState());
+				mav.addObject(RESPONSE_TYPE, CODE);
 
-				mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-				
-				RedirectView view=new RedirectView(OAuthConstants.AUTHORIZATION_PAGE);
-				
 				Map<String, String> attrs=new HashMap<>();
-					attrs.put(OAuth.OAUTH_CLIENT_ID, authzReq.getClientId());
-					attrs.put(OAuth.OAUTH_REDIRECT_URI, authzReq.getRedirectURI());
-					attrs.put(OAuth.OAUTH_STATE, authzReq.getState());
-					attrs.put(OAuth.OAUTH_RESPONSE_TYPE, OAuth.OAUTH_CODE);
-					attrs.put("state", authzReq.getState());
-					
+					attrs.put(CLIENT_ID, authzReq.getClientId());
+					attrs.put(REDIRECT_URI, authzReq.getRedirectURI());
+					attrs.put(STATE, authzReq.getState());
+					attrs.put(RESPONSE_TYPE, CODE);
+					attrs.put(STATE, authzReq.getState());
+				
+				JstlView view=new JstlView(OAuthConstants.AUTHORIZATION_PAGE);
+
 					view.setAttributesMap(attrs);
 				mav.setView(view);
 
@@ -125,16 +132,10 @@ public class ServerSideAuthController {
 			// TODO Auto-generated catch block
 			
 			e.printStackTrace();
-			logger.log(Level.ERROR, e.getMessage());
-			
-			RedirectView view=new RedirectView(OAuthConstants.AUTHORIZATION_PAGE);
-				Map<String, String> attrs=new HashMap<>();
-					attrs.put("error", e.getMessage());
-				view.setAttributesMap(attrs);
-			
+			mav.addObject(ERROR_DESCRIPTION, e.getMessage());
 			mav.setStatus(HttpStatus.BAD_REQUEST);
 			
-			mav.setView(view);
+			mav.setView(new JstlView("/authorize.jsp"));
 			return mav;
 
 		} 
@@ -183,80 +184,79 @@ public class ServerSideAuthController {
 	 * @return
 	 */
 	
-	@RequestMapping(path="/authorize")
+	@RequestMapping(path="/authorize",method={RequestMethod.POST})
 	@Consumes("application/x-www-form-urlencoded")   
 	@Produces("application/x-www-form-urlencoded")
 	public ModelAndView authorize(HttpServletRequest req,ModelAndView mav){
 		OAuthAuthzRequest request=null;
-		
-		logger.info("parameter:"+req.getParameter("response_type")+" attribute:"+req.getAttribute("response_type"));
 		MultiValueMap<String, String> headers=new HttpHeaders();
 		try {
 				request=new OAuthAuthzRequest(req);	
+				
 				String response_type=request.getResponseType();
 				String client_id=request.getClientId();
 				Set<String> scopes=request.getScopes();
 				String state=request.getState();
 				String redirect_uri=request.getRedirectURI();
 		
-				String user_id=request.getParam("user_id");
-				String username=request.getParam("username");
-				String password=request.getParam("password");
+				String user_id=request.getParam(USER_ID);
+				String password=request.getParam(PASSWORD);
+				String service_id=request.getParam(SERVICE_ID);
 				
-				
-				
-				logger.info("client_id:"+client_id);
-				logger.info("response_type:"+response_type);
-				//logger.info("scopes:"+scopesStr);
-				logger.info("state:"+state);
-				logger.info("user_id:"+user_id);
-				logger.info("username:"+username);
-				logger.info("password:"+password);
-//				
-//				Set<String> scopes=OAuthUtils.convertScopeStrToScopes(scopesStr);
-				
-				Registration reg_client=regService.findByClientId(client_id);
-				if(reg_client==null)
-					throw new OAuthAuthzException("Client not registed!");
-				if(reg_client.getIs_server_auth_enabled()=='N')
-					throw new OAuthAuthzException("client is disabled!");
-				
-				String receive_authcode_uri=reg_client.getReceive_authz_code_uri();
-				
-				User user=userService.findByUsernameAndPassword(username, password);
-				
-				if(user!=null && user.getId()==Integer.parseInt(user_id)){
-					String auth_code="FAKE_AUTH_CODE";
+				Client client=cliService.findByClient_id(client_id);
+					if(client==null) throw new OAuthAuthzException(ERROR_CLIENT_NOT_EXISTS);
+				Service service=serService.findByService_id(service_id);
+					if(service==null) throw new OAuthAuthzException(ERROR_SERVICE_NOT_EXISTS);
 					
-					AuthorizationCode code=new AuthorizationCode(client_id, user_id, scopes, OAuthConstants.AUTHORIZATION_CODE_EXPIRES_IN, auth_code);
-					//save code to redis
-					oauthService.addAuthorizationCode(code);
+				int service_id_int=service.getId();
+				int client_id_int=client.getId();
+				int user_id_int=Integer.parseInt(user_id);
+				
+				boolean authorize=true;
+				
+				if(ServiceType.TF02.equals(service_id)){
+					String tel=request.getParam(TEL);
+					FamilyAccount fa=accService.getFamilyAccountByTelAndPassword(tel, password);
+					List<FamilyMembers> fmList=accService.findMembersInfoByFamilyId(fa.getId());
+					for(FamilyMembers fm:fmList){
+						if(Integer.parseInt(fm.getMemberId())==user_id_int){
+							authorize=true;
+							break;
+						}
+					}
 					
-					CloseableHttpResponse clientResp=sendAuthzCodeToClient(code, receive_authcode_uri, state);
+				}
+				
+				if(authorize){
+					String auth_code=oauthService.addAuthorizationCode(service_id_int, client_id_int, user_id_int);
+					
+					CloseableHttpResponse clientResp=sendAuthzCodeToClient(auth_code, client.getReceive_authcode_uri(), state);
 					
 					if(clientResp.getStatusLine().getStatusCode()==HttpServletResponse.SC_OK){
 						
 						mav.setStatus(HttpStatus.OK);
-						mav.setViewName(redirect_uri);
+						mav.setViewName("redirect:"+redirect_uri);
 						
 						return mav;
 					}else
-						throw new OAuthAuthzException("send auth-code error, error-code:"+clientResp.getStatusLine().getStatusCode()+" error-description:"+clientResp.getStatusLine().getReasonPhrase());
-					
+						throw new OAuthAuthzException(ERROR_SEND_AUTHCODE_FAIL+":"+clientResp.getStatusLine().getReasonPhrase());
 					
 				}else{
-					throw new OAuthAuthzException("user authentication failed!");
+					throw new OAuthAuthzException(ERROR_AUTHORIZE_FAIL);
 				}
 
-		} catch (OAuthSystemException | OAuthAuthzException | IOException | URISyntaxException | OAuthProblemException e) {
+
+		} catch (OAuthSystemException | OAuthAuthzException | IOException | URISyntaxException | OAuthProblemException | NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
-				e.printStackTrace();
-				//some error occurs
-				mav.addObject("error", e.getClass().getSimpleName());
+
+				mav.addObject(ERROR, e.getClass().getSimpleName());
+				mav.addObject(ERROR_DESCRIPTION, e.getMessage());
 				mav.setStatus(HttpStatus.BAD_REQUEST);
-				//mav.setViewName(OAuthConstants.AUTHORIZATION_PAGE);
-				mav.setView(new RedirectView(OAuthConstants.AUTHORIZATION_PAGE));
-				mav.addObject("error-description", e.getMessage());
+
+				JstlView view=new JstlView("/authorize.jsp");
+
+				mav.setView(view);
+	
 				return mav; 
 
 		}
@@ -264,12 +264,22 @@ public class ServerSideAuthController {
 	}
 	
 	
-	public CloseableHttpResponse sendAuthzCodeToClient(AuthorizationCode auth_code,String receive_authcode_uri,String state) throws URISyntaxException, ClientProtocolException, IOException{
+	/**
+	 *  需呀返回auth_code,state
+	 * @param auth_code
+	 * @param receive_authcode_uri
+	 * @param state
+	 * @return
+	 * @throws URISyntaxException
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+	public CloseableHttpResponse sendAuthzCodeToClient(String auth_code,String receive_authcode_uri,String state) throws URISyntaxException, ClientProtocolException, IOException{
 		// add scope utils later!
 		
 		List<Header> http_headers=new ArrayList<>();
 
-			Header header=new BasicHeader("state",state);
+			Header header=new BasicHeader(STATE,state);
 			http_headers.add(header);
 			
 		CloseableHttpClient client=HttpClients.custom()
@@ -279,9 +289,13 @@ public class ServerSideAuthController {
 		HttpPost post=new HttpPost(new URI(receive_authcode_uri));
 			
 			post.setHeader("content-type", "application/json;charset=utf-8");
-			JSONObject jsonObj=new JSONObject(auth_code);
 			
-			logger.info("@send code to client: jsonObj"+jsonObj);
+			Map<String, String> result=new HashMap<>();
+				result.put(CODE, auth_code);
+				result.put(STATE, state);
+
+			
+			JSONObject jsonObj=new JSONObject(result);
 			
 			post.setEntity(new StringEntity(jsonObj.toString(), Charset.forName("UTF-8")));
 		
@@ -312,70 +326,52 @@ public class ServerSideAuthController {
 			try {
 				request = new OAuthTokenRequest(req);
 				String client_id=request.getClientId();
-				String state=request.getParam("state");
+				String state=request.getParam(STATE);
 				String code=request.getCode();
 				String grant_type=request.getGrantType();
 				String client_secrect=request.getClientSecret();
 				Set<String> scopes=request.getScopes();
-				String user_id=request.getParam("user_id");
+				String user_id=request.getParam(USER_ID);
+				String service_id=request.getParam(SERVICE_ID);
 				
 				
 				
-				Registration reg_client=regService.findByClientId(client_id);
+				Client client=cliService.findByClient_id(client_id);
+				Service service=serService.findByService_id(service_id);
+				
+				int service_id_int=service.getId();
+				int client_id_int=client.getId();
+				int user_id_int=Integer.parseInt(user_id);
+				
+	
 				
 				if(!grant_type.equalsIgnoreCase(GrantType.AUTHORIZATION_CODE.name()))
-					throw new OAuthTokenException("grant type must be AUTHORIZATION_CODE ,incase-sensitive!");
-				if(reg_client.getIs_server_auth_enabled()!='Y'){
-					//trhow exception...
-					logger.error("client-server is disabled!");
-					throw new OAuthTokenException("client-server is disabled!");
-				}
-						
-				if(!(reg_client!=null && client_id.equals(reg_client.getClient_id()) && client_secrect.equals(reg_client.getClient_secrect())) ){
-					//throw client validate exception, fata
-					logger.error("client-server validate fail!");
-					throw new OAuthTokenException("client-server validate fail!");
-				}
-					
+					throw new OAuthTokenException(ERROR_WRONG_GRANT_TYPE);
+				if(!client.getClient_secrect().equals(client_secrect))		
+					throw new OAuthTokenException(ERROR_CLIENT_AUTH_FAIL);
 					
 				//check code in redis
-				AuthorizationCode authCode=oauthService.getAuthorizationCode(code);
-
-				//check client_id ,user_id and scopes
-				if(client_id.equals(authCode.getClient_id()) && user_id.equals(authCode.getUser_id())){
-					Set<String> realScope=authCode.getScopes();
-					for(String scope:scopes){
-						if(!realScope.contains(scope)){
-							logger.error("scope not allowed:"+scope);
-							throw new OAuthTokenException("scope not allowed:"+scope);
-						}
-					}
+				String ac=oauthService.getAuthorizationCode(service_id_int, client_id_int, user_id_int);
+				if(ac.equals(code)){
+					String tkn=oauthService.addAccessToken_code(service_id_int, client_id_int, user_id_int);
+					String rftkn=oauthService.addRefreshToken(service_id_int, client_id_int, user_id_int);
 					
-					String accessToken="FAKE_ACCESS_TOKEN";
-					String refreshToken="FAKE_REFRESH_TOKEN";
-					
-					AccessToken aToken=new  AccessToken(client_id, user_id, scopes, OAuthConstants.ACCESS_TOKEN_CODE_EXPIRES_IN, accessToken);
-					RefreshToken rToken=new RefreshToken(client_id, user_id, OAuthConstants.REFRESH_TOKEN_EXPIRES_IN, refreshToken, scopes);
-					
-					List<Token> tokens=new ArrayList<>();
-						tokens.add(aToken);
-						tokens.add(rToken);
-						
-						headers.add("state", state);
-					logger.error("status OK *");
-					return new ResponseEntity<List<Token>>(tokens, headers, HttpStatus.OK);
-					
+					Map<String, String> result=new HashMap<>();
+						result.put(ACCESS_TOKEN, tkn);
+						result.put(REFRESH_TOKEN, rftkn);
+						result.put(STATE, state);
+					return new ResponseEntity<Map<String, String>>(result, HttpStatus.OK);
 				}else{
-					//throw user validate fail!
-					logger.error("user authorizacation fail!");
-					throw new OAuthTokenException("user authotication fail!");
+					//may be expired
+					throw new OAuthTokenException(ERROR_AUTHORIZE_FAIL);
 				}
+
+
 			} catch (OAuthSystemException | OAuthTokenException | OAuthProblemException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				headers.add("error", e.getClass().getSimpleName());
-				headers.add("error-description", e.getMessage());
-				logger.error("error-description:"+e.getMessage());
+				headers.add(ERROR, e.getClass().getSimpleName());
+				headers.add(ERROR_DESCRIPTION, e.getMessage());
 				return new ResponseEntity<>(headers,HttpStatus.BAD_REQUEST);
 			} 
 
@@ -441,7 +437,7 @@ public class ServerSideAuthController {
 	 */
 	@RequestMapping(path="/refreshToken")
 	@Consumes("application/json")
-	public ResponseEntity<List<Token>> useRefreshTokenForNewTokens(HttpServletRequest req){
+	public ResponseEntity<Map<String, String>> useRefreshTokenForNewTokens(HttpServletRequest req){
 		OAuthTokenRequest request;
 		HttpHeaders headers=new HttpHeaders();
 		
@@ -449,46 +445,45 @@ public class ServerSideAuthController {
 				request = new OAuthTokenRequest(req);
 				//search for refresh-token
 
-				String state=request.getParam("state");
+				String state=request.getParam(STATE);
 			
-				RefreshToken refreshToken=oauthService.getRefreshToken(request.getCode());
+				String refreshToken=request.getRefreshToken();
+				
+				String service_id=request.getParam(SERVICE_ID);
+				
 					
-					String client_id=refreshToken.getClient_id();
-					String expires_in=refreshToken.getExpires_in();
-					String user_id=refreshToken.getUser_id();
-					Set<String> scopes=refreshToken.getScopes();
+					String client_id=request.getClientId();
+					String user_id=request.getParam(USER_ID);
+					
+					Client client=cliService.findByClient_id(client_id);
+					Service service=serService.findByService_id(service_id);
+					
+					int service_id_int=service.getId();
+					int client_id_int=client.getId();
+					int user_id_int=Integer.parseInt(user_id);
+					
+					String rftkn=oauthService.getRefreshToken(service_id_int, client_id_int, user_id_int);
+					
+					if(rftkn==null)
+							throw new OAuthRefreshTokenException(ERROR_REFRESH_TOKEN_NOT_FOUND);
+					if(!rftkn.equals(refreshToken))
+							throw new OAuthRefreshTokenException(ERROR_AUTHORIZE_FAIL);
+					
+					String newTkn=oauthService.addAccessToken_code(service_id_int, client_id_int, user_id_int);
+					String newRftkn=oauthService.addRefreshToken(service_id_int, service_id_int, user_id_int);
 					
 					
-					
-				if(request.getGrantType().equals(OAuth.OAUTH_REFRESH_TOKEN) && refreshToken!=null){
-					//create new token
-					String tokenKey=OAuthUtils.generateToken();
-					AccessToken newToken=new AccessToken(client_id, user_id, scopes, expires_in, tokenKey);
-					oauthService.addAccessToken(newToken);
-					
-					// delete or expires old refreshToken and access token if exists
-					
-					//create new refreshToken
-					String newRefreshTokenKey=OAuthUtils.generateRefreshToken();
-						RefreshToken newRefreshToken=new RefreshToken(client_id, user_id, OAuthConstants.REFRESH_TOKEN_EXPIRES_IN, newRefreshTokenKey, scopes);
-						oauthService.addRefreshToken(newRefreshToken);
-					//send token and refresh token back to client
-					
-					List<Token> tokens=new ArrayList<>();
-						tokens.add(newToken);
-						tokens.add(newRefreshToken);
-						
-						headers.add("state", state);
-						
-					return new ResponseEntity<List<Token>>(tokens, headers, HttpStatus.OK);
-
-				}else throw new OAuthRefreshTokenException("refresh token not found!");
+					Map<String, String> result=new HashMap<>();
+						result.put(ACCESS_TOKEN, newTkn);
+						result.put(REFRESH_TOKEN, newRftkn);
+						result.put(STATE, state);
+						return new ResponseEntity<Map<String,String>>(result,HttpStatus.OK);
 				
 			} catch (OAuthSystemException | OAuthRefreshTokenException | OAuthProblemException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				headers.add("error", e.getClass().getSimpleName());
-				headers.add("error-descriptioin", e.getMessage());
+				headers.add(ERROR, e.getClass().getSimpleName());
+				headers.add(ERROR_DESCRIPTION, e.getMessage());
 				return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
 			} 
 			
