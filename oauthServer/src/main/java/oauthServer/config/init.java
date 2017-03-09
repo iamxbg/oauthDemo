@@ -5,6 +5,7 @@ import javax.servlet.ServletRegistration.Dynamic;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class init extends AbstractAnnotationConfigDispatcherServletInitializer{
@@ -34,10 +35,19 @@ public class init extends AbstractAnnotationConfigDispatcherServletInitializer{
 		// TODO Auto-generated method stub
 		CharacterEncodingFilter filter=new CharacterEncodingFilter();
 			filter.setEncoding("UTF-8");
+			filter.setForceEncoding(true);
 			return new Filter[]{ filter };
+	
 	}
 
-
-
+	@Override
+	protected void customizeRegistration(Dynamic registration) {
+		// TODO Auto-generated method stub
+		super.customizeRegistration(registration);
+	}
+	
+	
+	
+	
 	
 }

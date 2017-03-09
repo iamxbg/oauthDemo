@@ -56,11 +56,12 @@ public interface OAuthConstants {
 		 /**
 		  *  expires_in
 		  */
-		public static int AUTHORIZATION_CODE_EXPIRES_IN=3600;
-		public static int ACCESS_TOKEN_CODE_EXPIRES_IN=3600;
-		public static int ACCESS_TOKEN_TOKEN_EXPIRES_IN=3600;
-		public static int REFRESH_TOKEN_EXPIRES_IN=1000000;
-		public static int OPENID_TOKEN_EXPIRES_IN=5000;
+		public static long AUTHORIZATION_CODE_EXPIRES_IN=3600;
+		public static long ACCESS_TOKEN_CODE_EXPIRES_IN=3600;
+		public static long ACCESS_TOKEN_TOKEN_EXPIRES_IN=3600;
+		public static long REFRESH_TOKEN_EXPIRES_IN=1000000;
+		public static long OPENID_TOKEN_EXPIRES_IN=5000;
+		public static long OPENID_EXPIRES_IN=3000;
 		/**
 		 *  authorize_page
 		 */

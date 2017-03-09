@@ -1,200 +1,217 @@
 package oauthServer.service.impl;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
+
 import org.apache.oltu.oauth2.as.request.OAuthUnauthenticatedTokenRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import oauthServer.service.OAuthService;
-import oauthServer.util.OAuthConstants;
+import static oauthServer.util.OAuthConstants.*;
 import oauthServer.util.OAuthUtils;
 
 @Service
 public class OAuthServiceImpl implements OAuthService {
 	
-	public  static String REFRESH_TOKEN_KEY_LABEL="rftkn";
-	public  static String ACCESS_TOKEN_KEY_LABEL="tkn";
-	public  static String AUTHZ_CODE_KEY_LABEL="ac";
-	public  static String SCOPE_KEY_LABEL="scp";
-	public  static String OPENID_TOKEN_KEY_LABEL="oit"; 
+	
 	
 	public OAuthServiceImpl() {
 		// TODO Auto-generated constructor stub
 	}
 	
 	@Autowired
-	private RedisOperations<String, String> oprs;
+	private RedisOperations oprs;
+
+//	@Autowired
+//	private RedisOperations<String, Map<String, String>> oprs;
 	
 	@Override
 	public String addAuthorizationCode(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(AUTHZ_CODE_KEY_LABEL)
+		String key=new StringBuilder(REDIS_KEY_AUTHORIZATION_CODE)
 			.append(":").append(service_id)
 			.append(":").append(client_id)
 			.append(":").append(user_id)
 			.toString();
-		String value=OAuthUtils.generateUUID();
+		String codeVal=OAuthUtils.generateUUID();
 		
-		ValueOperations<String,String> valOps=oprs.opsForValue();
-			valOps.set(key, value,OAuthConstants.AUTHORIZATION_CODE_EXPIRES_IN,TimeUnit.SECONDS);
+		HashOperations<String,String,String> valOps=oprs.opsForHash();
+		
+			Map<String, String> m=new HashMap<>();
+				m.put(REDIS_FIELD_CODE, codeVal);
 			
-			return value;
+			valOps.putAll(key, m);
+			oprs.expire(key, AUTHORIZATION_CODE_EXPIRES_IN, TimeUnit.SECONDS);
+			
+			return new StringBuilder(key).append(":").append(codeVal).toString();
 	}
 
 	@Override
 	public String addAccessToken_code(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
+		String key=new StringBuilder(REDIS_KEY_ACCESS_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
 				.toString();
-			String value=OAuthUtils.generateUUID();
+		
+		
+			String tokenVal=OAuthUtils.generateUUID();
+			String refreshVal=OAuthUtils.generateUUID();
+					
+			HashOperations<String,String,String> valOps=oprs.opsForHash();
 			
-			ValueOperations<String,String> valOps=oprs.opsForValue();
-				valOps.set(key, value,OAuthConstants.ACCESS_TOKEN_CODE_EXPIRES_IN,TimeUnit.SECONDS);
+			Map<String, String> m=new HashMap<>();
+			
+			//scopes=.
+			
+			m.put(REDIS_FIELD_REFRESH_TOKEN,refreshVal );
+			m.put(REDIS_FIELD_TOKEN, tokenVal);
+			m.put(REDIS_FIELD_EXPIRES_AT, new Long(new Date().getTime()+ACCESS_TOKEN_CODE_EXPIRES_IN).toString());
+		//	m.put(REDIS_FIELD_SCOPES, value);
+			
+				valOps.putAll(key, m);
+				oprs.expire(key,ACCESS_TOKEN_CODE_EXPIRES_IN,TimeUnit.SECONDS);
 
-				return value;
+				return new StringBuilder(key).append(":").append(tokenVal).toString();
 	}
 	
 	@Override
 	public String addAccessToken_token(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
+		String key=new StringBuilder(REDIS_KEY_ACCESS_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
 				.toString();
 		
-			String value=OAuthUtils.generateUUID();
+			String tokenValue=OAuthUtils.generateUUID();
 			
-			ValueOperations<String,String> valOps=oprs.opsForValue();
-				valOps.set(key, value,OAuthConstants.ACCESS_TOKEN_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+			HashOperations<String,String,String> valOps=oprs.opsForHash();
+				//valOps.set(key, value,ACCESS_TOKEN_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+			
+			Map<String, String> m=new HashMap<>(); 
+
+				String expires_at=new Long(new Date().getTime()+ACCESS_TOKEN_TOKEN_EXPIRES_IN).toString();
+			
+				m.put(REDIS_FIELD_EXPIRES_AT, expires_at);
+				m.put(REDIS_FIELD_TOKEN, tokenValue);
+			//	m.put(REDIS_FIELD_SCOPES, value);
+
+			valOps.putAll(key, m);
+			
+			return new StringBuilder(key).append(":").append(tokenValue).toString();
+	}
 	
-				return value;
-	}
-	
+
+
 
 	@Override
-	public String addRefreshToken(int service_id, int client_id, int user_id) {
-		// TODO Auto-generated method stub
-		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
-			String value=OAuthUtils.generateUUID();
-			
-			ValueOperations<String,String> valOps=oprs.opsForValue();
-				valOps.set(key, value,OAuthConstants.REFRESH_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
-				
-				return value;
-	}
-
-	@Override
-	public String getAccessToken(int service_id, int client_id, int user_id) {
+	public Map<String, String> getAccessToken(String scuKey) {
 		// TODO Auto-generated method stub
 		
-		String key=new StringBuilder(ACCESS_TOKEN_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
+		String key=new StringBuilder(REDIS_KEY_ACCESS_TOKEN)
+				.append(":").append(scuKey).toString();
 					
-		ValueOperations<String,String> valOps=oprs.opsForValue();
-		return valOps.get(key);
+		HashOperations<String,String, String> valOps=oprs.opsForHash();
+		return valOps.entries(key);
 
 	}
 
 	@Override
-	public String getAuthorizationCode(int service_id, int client_id, int user_id) {
+	public Map<String, String> getAuthorizationCode(String scuKey) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(AUTHZ_CODE_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
+		String key=new StringBuilder(REDIS_KEY_AUTHORIZATION_CODE)
+				.append(":").append(scuKey).toString();
 					
-		ValueOperations<String,String> valOps=oprs.opsForValue();
-		return valOps.get(key);
+		HashOperations<String,String,String> valOps=oprs.opsForHash();
+		return valOps.entries(scuKey);
 	}
 
+
+
+
+
 	@Override
-	public String getRefreshToken(int service_id, int client_id, int user_id) {
+	public Map<String, String> getOpenIdAuthToken(String scuKey) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
+		String key=new StringBuilder(REDIS_KEY_OPENID_AUTHORIZATION_TOKEN)
+				.append(":").append(scuKey).toString();
 					
-		ValueOperations<String,String> valOps=oprs.opsForValue();
-		return valOps.get(key);
-	}
-
-	@Override
-	public Set<String> getScopes(int service_id, int client_id, int user_id) {
-		// TODO Auto-generated method stub
-		String key=new StringBuilder(SCOPE_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
-		
-		SetOperations<String, String> setOps=oprs.opsForSet();
-		return setOps.members(key);
-
-	}
-
-	@Override
-	public void setScope(int service_id, int client_id, int user_id, Set<String> scopes) {
-		// TODO Auto-generated method stub
-		String key=new StringBuilder(SCOPE_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
-		
-		SetOperations<String, String> setOps=oprs.opsForSet();
-			for(String scp:scopes){
-				setOps.add(key, scp);
-			}
-			
-			
-		}
-
-	@Override
-	public String getOpenIdAuthToken(int service_id, int client_id, int user_id) {
-		// TODO Auto-generated method stub
-		String key=new StringBuilder(OPENID_TOKEN_KEY_LABEL)
-				.append(":").append(service_id)
-				.append(":").append(client_id)
-				.append(":").append(user_id)
-				.toString();
-					
-		ValueOperations<String,String> valOps=oprs.opsForValue();
-		return valOps.get(key);
+		HashOperations<String,String,String> valOps=oprs.opsForHash();
+		return valOps.entries(key);
 	}
 
 	@Override
 	public String addOpenIdAuthToken(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REFRESH_TOKEN_KEY_LABEL)
+		String key=new StringBuilder(REDIS_KEY_OPENID_AUTHORIZATION_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
 				.toString();
 			String value=OAuthUtils.generateUUID();
 			
-			ValueOperations<String,String> valOps=oprs.opsForValue();
-				valOps.set(key, value,OAuthConstants.OPENID_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+			HashOperations<String,String,String> valOps=oprs.opsForHash();
+			
+			String authTOken="FAKE_AUTH_TOKEN";
+			
+			Map<String, String> m=new HashMap<>();
+				m.put(REDIS_FIELD_CODE, authTOken);
+				valOps.putAll(key, m);
 				
-				return value;
+				
+			oprs.expire(key, OPENID_TOKEN_EXPIRES_IN, TimeUnit.SECONDS);
+
+				return new StringBuilder(key).append(":").append(value).toString();
+	}
+
+	@Override
+	public String addOpenId(int service_id, int client_id, int user_id) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(REDIS_KEY_OPENID)
+				.append(":").append(service_id)
+				.append(":").append(client_id)
+				.append(":").append(user_id)
+				.toString();
+		
+			String value=OAuthUtils.generateUUID();
+			
+			HashOperations<String,String,String> valOps=oprs.opsForHash();
+			
+				//valOps.set(key, value,OAuthConstants.OPENID_TOKEN_EXPIRES_IN,TimeUnit.SECONDS);
+			
+				String openid="FAKE_OPEN_ID";
+			
+				Map<String, String>  m=new HashMap<>();
+					m.put(REDIS_KEY_OPENID, openid);
+			
+				valOps.putAll(key, m);
+				oprs.expire(key, OPENID_EXPIRES_IN, TimeUnit.SECONDS);
+				//++++++++++++++++++++++++++++
+				return new StringBuilder(key).append(":").append(openid).toString();
+	}
+
+	@Override
+	public Map<String, String> getOpenId(String scuKey) {
+		// TODO Auto-generated method stub
+		String key=new StringBuilder(REDIS_KEY_OPENID)
+				.append(":").append(scuKey).toString();
+					
+		HashOperations<String,String,String> valOps=oprs.opsForHash();
+		
+		return valOps.entries(key);
 	}
 		
 

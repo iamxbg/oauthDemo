@@ -10,28 +10,39 @@ import org.apache.oltu.oauth2.common.message.types.TokenType;
 
 public interface OAuthService {
 
-	public String addAuthorizationCode(int service_id,int client_id,int user_id);
-	
-	public String addAccessToken_code(int service_id,int client_id,int user_id);
-	
-	public String addAccessToken_token(int service_id,int client_id,int user_id);
-	
-	public String addRefreshToken(int service_id,int client_id,int user_id);
-	
-	public String getAccessToken(int service_id,int client_id,int user_id);
-	
-	public String getAuthorizationCode(int service_id,int client_id,int user_id);
-	
-	public String getRefreshToken(int service_id,int client_id,int user_id);
-
-	public Set<String> getScopes(int service_id,int client_id,int user_id);
-	
-	public void setScope(int service_id,int client_id,int user_id,Set<String> scopes);
+	//key labels
+	public  static String REDIS_KEY_ACCESS_TOKEN="at";
+	public  static String REDIS_KEY_AUTHORIZATION_CODE="ac";
+	public  static String REDIS_KEY_OPENID="oi"; 
+	public  static String REDIS_KEY_OPENID_AUTHORIZATION_TOKEN="oit";
+	// fields labels
+	public static String REDIS_FIELD_EXPIRES_AT="exat";
+	public static String REDIS_FIELD_TOKEN="tkn";
+	public static String REDIS_FIELD_SCOPES="scp";
+	public static String REDIS_FIELD_REFRESH_TOKEN="rtk";
+	public static String REDIS_FIELD_OPENID="openid";
+	public static String REDIS_FIELD_CODE="cd";
 	
 	
+	public String addAuthorizationCode(int service_id_int,int client_id_int,int user_id_int);
 	
-	public String getOpenIdAuthToken(int service_id,int client_id,int user_id);
+	public String addAccessToken_code(int service_id_int,int client_id_int,int user_id_int);
+	
+	public String addAccessToken_token(int service_id_int,int client_id_int,int user_id_int);
+	
 	public String addOpenIdAuthToken(int service_id,int client_id,int user_id);
+	
+	public String addOpenId(int service_id,int client_id,int user_id);
+
+	public Map<String, String> getAccessToken(String scukey);
+	
+	public Map<String, String> getAuthorizationCode(String  scuKey);
+
+	public Map<String, String> getOpenIdAuthToken(String scuKey);
+	
+	
+	public Map<String, String> getOpenId(String scuKey);
+	
 	
 	
 }
