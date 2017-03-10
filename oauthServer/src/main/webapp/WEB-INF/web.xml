@@ -8,6 +8,15 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
   
-
+	  <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>TokenValidation</web-resource-name>
+            <url-pattern>/validate_token</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <!-- Needed for our application to respond to https requests -->
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 
 </web-app>

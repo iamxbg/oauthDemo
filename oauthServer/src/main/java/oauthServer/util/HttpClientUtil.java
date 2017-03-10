@@ -42,7 +42,7 @@ public class HttpClientUtil {
 				ConnectionSocketFactory p_csf=new PlainConnectionSocketFactory();
 				
 				
-				Registry<ConnectionSocketFactory> registry=RegistryBuilder.<ConnectionSocketFactory>create().register("https", p_csf)
+				Registry<ConnectionSocketFactory> registry=RegistryBuilder.<ConnectionSocketFactory>create().register("http", p_csf)
 									.register("https", ssl_csf)
 									.build();
 				

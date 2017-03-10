@@ -34,11 +34,13 @@ import org.springframework.context.annotation.ComponentScan.Filter;
 @EnableTransactionManagement
 public class RootConfig {
 	
+	//config  properties for mysql
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
 	private static String PASSWORD="";
 	private static String USERNAME="root";
 	private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_server";
 
+	// config  properties for redis
 	private static String REDIS_PASSWORD="";
 	private static String REDIS_HOSTNAME="10.244.134.189";
 	
@@ -49,6 +51,10 @@ public class RootConfig {
 		// TODO Auto-generated constructor stub
 	}
 
+	/**
+	 *  mysql datasource
+	 * @return
+	 */
 	@Bean
 	public DataSource dataSource(){
 		BasicDataSource ds=new BasicDataSource();
@@ -59,6 +65,10 @@ public class RootConfig {
 			return ds;
 	}
 	
+	/**
+	 *  hibernate sessionFactory
+	 * @return
+	 */
 	@Bean
 	public LocalSessionFactoryBean sessionFactory(){
 		LocalSessionFactoryBean lsfb=new LocalSessionFactoryBean();
@@ -74,6 +84,11 @@ public class RootConfig {
 		return lsfb;
 	}
 	
+	/**
+	 *  hibernate Transaction Manager
+	 * @param sessionFactory
+	 * @return
+	 */
 	@Bean
 	@Autowired
 	public HibernateTransactionManager transactionManager(SessionFactory sessionFactory){
@@ -81,6 +96,10 @@ public class RootConfig {
 		return tm;
 	}
 	
+	
+	/**
+	 *  JediConnectionFactory
+	 */
 	@Bean
 	public JedisConnectionFactory jedisConnectionFactory(){
 		
@@ -101,6 +120,10 @@ public class RootConfig {
 		return cf;
 	}
 	
+	/**
+	 *  RedisTemplate 
+	 * @return
+	 */
 	@Bean
 	public RedisTemplate<String, String> redisTemplate(){
 		RedisTemplate< String, String> template=new StringRedisTemplate(jedisConnectionFactory());
@@ -109,10 +132,11 @@ public class RootConfig {
 	
 	
 	/**
+	 * HttpInvokerProxyFactoryBean
 	 * @return
 	 * @throws IOException 
 	 */
-	@Bean
+	@Bean(name="tf02")
 	public HttpInvokerProxyFactoryBean httpInvokerProxy() throws IOException{
 		
 		Properties props=new Properties();

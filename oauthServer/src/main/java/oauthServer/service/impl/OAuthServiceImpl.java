@@ -39,7 +39,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public String addAuthorizationCode(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_AUTHORIZATION_CODE)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+			.append(":").append(REDIS_KEY_AUTHORIZATION_CODE)
 			.append(":").append(service_id)
 			.append(":").append(client_id)
 			.append(":").append(user_id)
@@ -60,7 +61,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public String addAccessToken_code(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_ACCESS_TOKEN)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+				.append(":").append(REDIS_KEY_ACCESS_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
@@ -90,7 +92,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public String addAccessToken_token(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_ACCESS_TOKEN)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+				.append(":").append(REDIS_KEY_ACCESS_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
@@ -156,7 +159,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public String addOpenIdAuthToken(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_OPENID_AUTHORIZATION_TOKEN)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+				.append(":").append(REDIS_KEY_OPENID_AUTHORIZATION_TOKEN)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
@@ -180,7 +184,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public String addOpenId(int service_id, int client_id, int user_id) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_OPENID)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+				.append(":").append(REDIS_KEY_OPENID)
 				.append(":").append(service_id)
 				.append(":").append(client_id)
 				.append(":").append(user_id)
@@ -206,7 +211,8 @@ public class OAuthServiceImpl implements OAuthService {
 	@Override
 	public Map<String, String> getOpenId(String scuKey) {
 		// TODO Auto-generated method stub
-		String key=new StringBuilder(REDIS_KEY_OPENID)
+		String key=new StringBuilder(REDIS_ENCODING_GENERATION)
+				.append(":").append(REDIS_KEY_OPENID)
 				.append(":").append(scuKey).toString();
 					
 		HashOperations<String,String,String> valOps=oprs.opsForHash();
