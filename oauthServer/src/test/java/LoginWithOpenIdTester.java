@@ -1,4 +1,4 @@
-package oauthServer.web;
+
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,13 +23,13 @@ import oauthServer.config.WebConfig;
 @ContextConfiguration(classes={RootConfig.class,WebConfig.class})
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
-public class LoginWithOpenIdTest {
+public class LoginWithOpenIdTester {
 
 	@Autowired
 	private WebApplicationContext wac;
 	private MockMvc mvc;
 	
-	public LoginWithOpenIdTest() {
+	public LoginWithOpenIdTester() {
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -51,9 +51,7 @@ public class LoginWithOpenIdTest {
 		 
 		 URI uri=new URI(url);
 		 MvcResult result=mvc.perform(get(uri)).andDo(print()).andReturn();
-		
-		
-		
+
 	}
 
 }

@@ -55,12 +55,6 @@ public class ServerSideAuthControllerTester {
 		// TODO Auto-generated constructor stub
 	}
 
-//	mav.addObject(OAuth.OAUTH_CLIENT_ID, authzReq.getClientId());
-//	mav.addObject(OAuth.OAUTH_REDIRECT_URI, authzReq.getRedirectURI());
-//	mav.addObject(OAuth.OAUTH_STATE, authzReq.getState());
-//	mav.addObject(OAuth.OAUTH_RESPONSE_TYPE, OAuth.OAUTH_CODE);
-
-	//mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 	
 	@Test
 	public void testAuhtZView() throws Exception{

@@ -1,4 +1,4 @@
-package oauthServer.web;
+package oauthServer.web.openid;
 
 import java.io.IOException;
 import java.net.URI;
@@ -69,14 +69,10 @@ public class OpenIDController {
 	
 	@Autowired
 	private HttpClientUtil httpClientUtil;
-	
-
 	@Autowired
 	private OAuthService oauthService;
-
 	@Autowired
 	private AccountService accService;
-	
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -99,7 +95,7 @@ public class OpenIDController {
 	}
 	
 	@RequestMapping(path="/authorize",method=RequestMethod.POST)
-	public ModelAndView authorize(@RequestParam("tel") String tel
+	public ModelAndView accountAuthorize(@RequestParam("tel") String tel
 											,@RequestParam("password") String password
 											,@RequestParam("service_id") String service_id
 											,@RequestParam("client_id") String client_id
@@ -214,14 +210,7 @@ public class OpenIDController {
 				}else{
 					//not found , may be auth code is expired 
 				}
-					
-				
 
-			
-
-		
-			
-	
 			return null;
 		
 	}
@@ -264,6 +253,33 @@ public class OpenIDController {
 		
 			return client.execute(post);
 
+	}
+	
+	/**
+	 *  User login with openId
+	 * @param service_id
+	 * @param client_id
+	 * @param openid
+	 * @param req
+	 * @return
+	 */
+	@RequestMapping(path="/login/serice_id={service_id}&client_id={client_id}&openid={openid}")
+	public ResponseEntity loginWithOpenid(@PathVariable("service_id") String service_id,
+										@PathVariable("client_id") String client_id,
+										@PathVariable("openid") String openid,
+										HttpServletRequest req){
+		logger.info("service_id:"+service_id+" client_id:"+client_id+" openid:"+openid);
+		
+		
+		Map<String, String> userInfo=oauthService.getUserInfoByOpenId(openid);
+		if(userInfo!=null){
+			return new ResponseEntity<>(userInfo, HttpStatus.OK);
+		}else{
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+			
+		
+		
 	}
 	
 

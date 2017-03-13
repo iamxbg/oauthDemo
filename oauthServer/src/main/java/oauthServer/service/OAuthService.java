@@ -10,8 +10,6 @@ import org.apache.oltu.oauth2.common.message.types.TokenType;
 
 public interface OAuthService {
 
-	//encoding generation
-	public static String REDIS_ENCODING_GENERATION="g0";
 	//key labels
 	public  static String REDIS_KEY_ACCESS_TOKEN="at";
 	public  static String REDIS_KEY_AUTHORIZATION_CODE="ac";
@@ -45,7 +43,6 @@ public interface OAuthService {
 	
 	public Map<String, String> getOpenId(String scuKey);
 	
-	public boolean isOpenIdGenerationSame(String gen);
+	public Map<String, String> getUserInfoByOpenId(String openid);
 	
-	public boolean isAuthTokenGenerationSame(String gen);
 }

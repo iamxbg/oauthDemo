@@ -1,4 +1,4 @@
-package oauthServer.web;
+package oauthServer.web.oauth2;
 
 
 import javax.servlet.http.HttpServletRequest;
