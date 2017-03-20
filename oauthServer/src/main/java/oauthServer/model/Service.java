@@ -17,20 +17,20 @@ public class Service {
 	private String name;
 	private String description;
 	private String profile;
-	private String service_url;
+	private String authentication_url;
 	private int del_flag=0;
 	
 	public Service() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Service(String service_id, String name, String description, String profile, String service_url) {
+	public Service(String service_id, String name, String description, String profile, String authentication_url) {
 		super();
 		this.service_id = service_id;
 		this.name = name;
 		this.description = description;
 		this.profile = profile;
-		this.service_url = service_url;
+		this.authentication_url = authentication_url;
 	}
 
 	public String getService_id() {
@@ -65,14 +65,6 @@ public class Service {
 		this.profile = profile;
 	}
 
-	public String getService_url() {
-		return service_url;
-	}
-
-	public void setService_url(String service_url) {
-		this.service_url = service_url;
-	}
-
 	public int getId() {
 		return id;
 	}
@@ -87,6 +79,14 @@ public class Service {
 
 	public void setDel_flag(int del_flag) {
 		this.del_flag = del_flag;
+	}
+
+	public String getAuthentication_url() {
+		return authentication_url;
+	}
+
+	public void setAuthentication_url(String authentication_url) {
+		this.authentication_url = authentication_url;
 	}
 
 }

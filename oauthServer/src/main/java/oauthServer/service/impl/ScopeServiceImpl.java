@@ -8,34 +8,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import oauthServer.dao.ScopeDao;
 import oauthServer.model.Scope;
+import oauthServer.service.ScopeService;
 
 @Service
 @Transactional
-public class ScopeServiceImpl implements oauthServer.service.ScopeService {
-
-	@Autowired
-	private ScopeDao scopeDao;
+public class ScopeServiceImpl implements ScopeService{
 	
-	public ScopeServiceImpl() {
-		// TODO Auto-generated constructor stub
-	}
+	@Autowired
+	private ScopeDao scpDao;
 
 	@Override
 	public List<Scope> getScopesByClientId(int cid) {
 		// TODO Auto-generated method stub
-		return scopeDao.getScopesByClientId(cid);
+		return scpDao.findByClientId(cid);
 	}
 
 	@Override
 	public List<Scope> getScopesBydServiceId(int serviceId) {
 		// TODO Auto-generated method stub
-		return scopeDao.getScopesBydServiceId(serviceId);
+		return scpDao.findByServiceId(serviceId);
 	}
 
 	@Override
 	public Scope findById(int id) {
 		// TODO Auto-generated method stub
-		return scopeDao.findById(id);
+		return scpDao.findById(id);
 	}
 
 }

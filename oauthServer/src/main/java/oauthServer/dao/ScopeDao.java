@@ -3,13 +3,12 @@ package oauthServer.dao;
 import java.util.List;
 
 import oauthServer.model.Scope;
-import oauthServer.model.ServiceClientId;
 
 public interface ScopeDao {
+
+	public List<Scope> findByServiceId(int serviceId);
 	
-	public List<Scope> getScopesByClientId(int cid);
-	
-	public List<Scope> getScopesBydServiceId(int serviceId);
+	public List<Scope> findByClientId(int clientId);
 	
 	public Scope findById(int id);
 	

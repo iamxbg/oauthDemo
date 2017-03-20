@@ -2,16 +2,14 @@ package oauthServer.dao;
 
 import java.util.List;
 
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import oauthServer.model.Service;
 
 public interface ServiceDao {
-
-		public List<Service> findByClientId(int cid);
-		
-		public List<Service> findAll();
-		
-		public Service findById(int sid);
-		
-		public Service findByService_id(String service_id);
-		
+	
+	
+	public List<Service> findAll();
+	
 }

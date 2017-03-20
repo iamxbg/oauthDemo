@@ -1,7 +1,12 @@
 package oauthServer.config;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 import javax.sql.DataSource;
 
@@ -12,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -21,11 +27,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-
-import com.foxconn.service.AccountService;
-
 import redis.clients.jedis.JedisPoolConfig;
-
 import org.springframework.context.annotation.ComponentScan.Filter;
 
 @ComponentScan(basePackages={"oauthServer"}
@@ -36,8 +38,8 @@ public class RootConfig {
 	
 	//config  properties for mysql
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
-	private static String PASSWORD="";
-	private static String USERNAME="root";
+	private static String PASSWORD="dude";
+	private static String USERNAME="wilson";
 	private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_server";
 
 	// config  properties for redis
@@ -128,25 +130,6 @@ public class RootConfig {
 	public RedisTemplate<String, String> redisTemplate(){
 		RedisTemplate< String, String> template=new StringRedisTemplate(jedisConnectionFactory());
 		return template;
-	}
-	
-	
-	/**
-	 * HttpInvokerProxyFactoryBean
-	 * @return
-	 * @throws IOException 
-	 */
-	@Bean(name="tf02")
-	public HttpInvokerProxyFactoryBean httpInvokerProxy() throws IOException{
-		
-		Properties props=new Properties();
-			props.load(this.getClass().getClassLoader().getResourceAsStream("remoting.properties"));
-
-		HttpInvokerProxyFactoryBean factoryBean=new HttpInvokerProxyFactoryBean();
-			factoryBean.setServiceUrl(props.getProperty("tf02.serviceUrl"));
-			factoryBean.setServiceInterface(AccountService.class);
-			
-			return factoryBean;
 	}
 	
 

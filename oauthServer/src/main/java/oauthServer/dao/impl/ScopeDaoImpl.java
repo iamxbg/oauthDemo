@@ -8,32 +8,27 @@ import org.springframework.stereotype.Repository;
 
 import oauthServer.dao.ScopeDao;
 import oauthServer.model.Scope;
-import oauthServer.model.ServiceClientId;
 
 @Repository
 public class ScopeDaoImpl implements ScopeDao{
-	
+
 	@Autowired
 	private SessionFactory sf;
+	
+	@Override
+	public List<Scope> findByServiceId(int serviceId) {
+		// TODO Auto-generated method stub
+		return
+		sf.getCurrentSession().createQuery("from Scope scp where scp.sid=:sid")
+		.setInteger("sid", serviceId).list();
 
-	public ScopeDaoImpl() {
-		// TODO Auto-generated constructor stub
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public List<Scope> getScopesByClientId(int cid) {
+	public List<Scope> findByClientId(int clientId) {
 		// TODO Auto-generated method stub
-		return sf.getCurrentSession().createQuery("form Scope scp inner join ClientScope cs on scp.id=cs.csId.sid where cs.cdId.cid=:cid")
-				.setInteger("cid", cid).list();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<Scope> getScopesBydServiceId(int sid) {
-		// TODO Auto-generated method stub
-		return sf.getCurrentSession().createQuery("form Scope scp where scp.sid=:sid")
-				.setInteger("sid", sid).list();
+		return sf.getCurrentSession().createQuery("select scp from Scope scp left join ClientScope cs on scp.id=cs.csId.sid where cs.csId.cid=:cid")
+				.setInteger("cid", clientId).list();
 	}
 
 	@Override

@@ -215,7 +215,7 @@
 		    <artifactId>javaee-web-api</artifactId>
 		    <version>7.0</version>
 		    <scope>provided</scope>
-		    <exclusions>
+		     <exclusions>
 		    	<exclusion>
 		    		<groupId>javax.servlet</groupId>
 		    		<artifactId>javax.servlet-api</artifactId>
@@ -223,14 +223,18 @@
 		    </exclusions>
 		</dependency>
 		
+		
 		<dependency>
+		
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
-			<scope>system</scope>
+			<!-- 
+			 <scope>system</scope>
 			<systemPath>E:/downloads/javax.servlet-api-3.1.0.jar</systemPath>
+			 -->
 		</dependency>
-
+		 
 		
 		<!-- https://mvnrepository.com/artifact/org.apache.taglibs/taglibs-standard-impl -->
 		
@@ -296,90 +300,112 @@
 			
 			<!-- oltu -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.client -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.client</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.authzserver -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.authzserver</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.common -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.common</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.httpclient4 -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.httpclient4</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.resourceserver -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.resourceserver</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
-						
+			 -->			
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.resourceserver-filter -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.resourceserver-filter</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.commons/org.apache.oltu.commons.json -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.commons</groupId>
 			    <artifactId>org.apache.oltu.commons.json</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.commons/org.apache.oltu.commons.encodedtoken -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.commons</groupId>
 			    <artifactId>org.apache.oltu.commons.encodedtoken</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.jwt -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.jwt</artifactId>
 			    <version>1.0.1</version>
 			</dependency>
-						
+			 -->			
 			
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.commons/org.apache.oltu.commons.encodedtoken -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.commons</groupId>
 			    <artifactId>org.apache.oltu.commons.encodedtoken</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
-			
+			 -->
 			
 			
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.dynamicreg.common -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.dynamicreg.common</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.dynamicreg.server -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.dynamicreg.server</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
+			 -->
 			<!-- https://mvnrepository.com/artifact/org.apache.oltu.oauth2/org.apache.oltu.oauth2.dynamicreg.client -->
+			<!-- 
 			<dependency>
 			    <groupId>org.apache.oltu.oauth2</groupId>
 			    <artifactId>org.apache.oltu.oauth2.dynamicreg.client</artifactId>
 			    <version>${oltu.version}</version>
 			</dependency>
-			
+			 -->
 			
 			<!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
 			<dependency>

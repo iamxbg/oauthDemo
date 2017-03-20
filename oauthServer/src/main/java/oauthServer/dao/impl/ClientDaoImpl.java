@@ -1,5 +1,7 @@
 package oauthServer.dao.impl;
 
+import java.util.List;
+
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -31,6 +33,13 @@ public class ClientDaoImpl implements ClientDao{
 		return (Client) sf.getCurrentSession().createQuery("from Client c where c.client_id=:client_id")
 				.setString("client_id", client_id)
 				.uniqueResult();
+	}
+
+	@Override
+	public List<Client> findAll() {
+		// TODO Auto-generated method stub
+		return sf.getCurrentSession().createQuery("from Client cli").list();
+
 	}
 
 

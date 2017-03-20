@@ -1,5 +1,7 @@
 package oauthServer.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,12 @@ public class ClientServiceImpl implements ClientService {
 	public Client findByClient_id(String client_id) {
 		// TODO Auto-generated method stub
 		return clientDao.findByClient_id(client_id);
+	}
+
+	@Override
+	public List<Client> findAll() {
+		// TODO Auto-generated method stub
+		return clientDao.findAll();
 	}
 
 }

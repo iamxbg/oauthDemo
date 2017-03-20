@@ -9,9 +9,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name="client_t")
 public class Client {
-
-	public static String AUTH_TYPE_SERVER="authorization_code";
-	public static String AUTH_TYPE_CLIENT="token";
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
