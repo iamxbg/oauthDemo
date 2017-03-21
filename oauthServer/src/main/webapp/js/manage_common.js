@@ -1,2 +1,0 @@
-//initialize the sub page.
-
