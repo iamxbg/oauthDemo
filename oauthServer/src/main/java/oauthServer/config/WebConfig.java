@@ -31,7 +31,7 @@ import oauthServer.service.TokenValidationService;
 import static oauthServer.util.OAuthConstants.*;
 
 @Configuration
-@ComponentScan(basePackages={"oauthServer.web.oauth2"})
+@ComponentScan(basePackages={"oauthServer.web"})
 @EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter{
 	

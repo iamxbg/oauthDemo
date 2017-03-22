@@ -1,4 +1,4 @@
-package oauthServer.web.oauth2;
+package oauthServer.web;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,12 +22,16 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.BasicHttpEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Level;
@@ -49,7 +53,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+
 import oauthServer.model.Client;
 import oauthServer.model.Service;
 import oauthServer.model.User;
@@ -152,6 +160,89 @@ public class ServerSideAuthController {
 		
 		return mav;
 		
+	}
+	
+	@RequestMapping(path="/authenticationView/service_id={service_id}&client_id={client_id}&state={state}&redirect_uri={redirect_uri}" ,method=RequestMethod.GET)
+	public ModelAndView authenticationView(@PathVariable("client_id") String client_id
+			,@PathVariable("service_id") String service_id
+			,@PathVariable("state") String state
+			,@PathVariable("redirect_uri") String redirect_uri
+			,ModelAndView mav){
+		
+		logger.info("@AuthenticationView@");
+		
+		mav.setView(new JstlView("/ssaAuthenticationView.jsp"));
+		//mav.addObject("client_id", client_id);
+		//mav.addObject("service_id", service_id);
+		//mav.addObject("state", state);
+		
+		
+		return mav;
+	}
+	
+	@RequestMapping(path="/authenticate",method=RequestMethod.POST)
+	public ModelAndView anthenticate(@RequestParam("account") String account,
+								@RequestParam("password") String password,
+								@RequestParam("service_id") String service_id,
+								@RequestParam("client_id") String client_id,
+								@RequestParam("state") String state,
+								@RequestParam("redirect_uri") String redirect_uri,
+								ModelAndView mav) throws URISyntaxException, JsonProcessingException{
+		logger.info("@Authenticate");
+		
+		PoolingHttpClientConnectionManager connManager=new PoolingHttpClientConnectionManager();
+		
+		HttpClient client=HttpClients.custom()
+							.setConnectionManager(connManager).build();
+		
+		HttpPost post=new HttpPost(new URI("http://localhost:8081/TF02/oauth/authenticate"));
+		
+		Map<String, String> map=new HashMap<>();
+			map.put("account", account);
+			map.put("password", password);
+		
+		ObjectMapper mapper=new ObjectMapper();
+			
+		String value=mapper.writeValueAsString(map);
+		
+		HttpEntity entity=new StringEntity(value, Charset.forName("utf-8"));
+			post.setEntity(entity);
+		
+		
+			ResponseHandler<String> handler=new BasicResponseHandler();
+			
+			
+			
+		try {
+			String respString=client.execute(post, handler);
+			
+			Map<String, String> resultMap=mapper.readValue(respString, HashMap.class);
+			
+			logger.info("result:"+resultMap.get("result"));
+			logger.info("reason:"+resultMap.get("reason"));
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//boolean authenticatePass=true;
+		
+		boolean authenticatePass=true;
+		
+		if(authenticatePass){
+			
+			mav.setView(new RedirectView("http://www.processon.com", false));
+		}else{
+			mav.setView(new JstlView("/ssaAuthenticationView.jsp"));
+			mav.addObject("client_id", client_id);
+			mav.addObject("service_id",service_id);
+			mav.addObject("redirect_uri", redirect_uri);
+			mav.addObject("state", state);
+			
+		}
+		
+		return mav;
 	}
 	
 	@RequestMapping(path="/token/grant_type=authorization_code"

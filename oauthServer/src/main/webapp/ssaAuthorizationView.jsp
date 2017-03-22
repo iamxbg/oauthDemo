@@ -59,10 +59,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				margin-left:220px;
 			}
 			
-		#actions{
-			width:100%;height:120px;
-			background:red;
-		}
+			#actions{
+				width:100%;height:120px;
+				background:red;
+			}
 		
 			#aggree{
 				width:200px;
@@ -81,37 +81,31 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <body>
 	
 	<div>
+		<div id='app_infos'>
+			<div id='app_profile'>
+				<IMG alt="" src="" />
+			</div>
+			<div id='app_name'>
+				<SPAN>春雨医生</SPAN>
+			</div>
+		</div>
 
-				<div id='app_infos'>
-					<div id='app_profile'>
-						<IMG alt="" src="" />
-					</div>
-					<div id='app_name'>
-						<SPAN>春雨医生</SPAN>
-					</div>
-				</div>
+		<div id='scopes'>
+			<span id='tip'>使用XXX登陆后该应用将获得以下权限:</span>
+			<ul>
+				<li><span>获得你的公开资料</span></li>
+				<li><span>使用您的医疗健康数据</span></li>
+			</ul>
+		</div>
 
-				<div id='scopes'>
-					<span id='tip'>使用XXX登陆后该应用将获得以下权限:</span>
-					<ul>
-						<li><span>获得你的公开资料</span></li>
-						<li><span>使用您的医疗健康数据</span></li>
-					</ul>
-				</div>
-
-				<div id='actions'>
-					<div id='aggree'>
-						<span>授权并登陆</span>
-					</div>
-				</div>
-
+		<div id='actions'>
+			<div id='aggree'>
+				<span>授权并登陆</span>
+			</div>
+		</div>
 	</div>
 	 
 	 
-	 <script type='text/javascript' src='js/jquery-1.9.1.min.js'/>
-	  
-	  <script>
-			alert('why!')
-	 </script>
+	
 </body>
 </html>
