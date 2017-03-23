@@ -2,9 +2,9 @@ package oauthServer.service.impl;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import oauthServer.dao.ServiceDao;
 import oauthServer.model.Service;
@@ -21,6 +21,12 @@ public class ServiceServiceImpl implements ServiceService{
 	public List<Service> findAll() {
 		// TODO Auto-generated method stub
 		return sDao.findAll();
+	}
+
+	@Override
+	public Service findByService_id(String service_id) {
+		// TODO Auto-generated method stub
+		return sDao.findByService_id(service_id);
 	}
 
 }

@@ -19,12 +19,24 @@
 #auth ul #lastLi {
   margin-bottom: 14px;
 }
-#auth ul li {
+#auth ul li.iptLi {
   height: 36px;
-  border: 1px solid ;
-  margin-top: 20px;
-  margin-left: 40px;
   line-height: 36px;
+}
+#auth ul li.errLi {
+  height: 24px;
+  line-height: 24px;
+}
+#auth ul li.errLi .error {
+  text-indent: 4em;
+  float: left;
+  letter-spacing: 4px;
+  color: red;
+}
+#auth ul li {
+  border: 1px solid ;
+  margin-top: 2px;
+  margin-left: 40px;
   width: 436px;
 }
 #auth ul li .label {

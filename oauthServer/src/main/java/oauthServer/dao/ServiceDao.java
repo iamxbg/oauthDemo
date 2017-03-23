@@ -12,4 +12,7 @@ public interface ServiceDao {
 	
 	public List<Service> findAll();
 	
+	
+	public Service findByService_id(String service_id);
+	
 }

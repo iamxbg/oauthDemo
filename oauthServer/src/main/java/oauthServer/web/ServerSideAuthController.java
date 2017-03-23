@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -37,6 +38,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -59,9 +61,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
 import oauthServer.model.Client;
+import oauthServer.model.Scope;
 import oauthServer.model.Service;
 import oauthServer.model.User;
 import oauthServer.service.ClientService;
+import oauthServer.service.ScopeService;
+import oauthServer.service.ServiceService;
 import oauthServer.util.AuthorizeResponse;
 import oauthServer.util.HttpClientUtil;
 import oauthServer.util.OAuthConstants;
@@ -77,54 +82,16 @@ public class ServerSideAuthController {
 	@Autowired
 	private HttpClientUtil httpClientUtil;
 	
+	@Autowired
+	private ServiceService serService;
+	@Autowired
+	private ClientService cliService;
+	
+	@Autowired
+	private ScopeService scpService;
+	
 	public ServerSideAuthController() {
 		// TODO Auto-generated constructor stub
-	}
-
-
-	/***
-	 *  needed params:
-	 *  	repsonse_type(required , must be code)
-	 *  	client_id(required)
-	 *  	redirect_uri(optional)
-	 *  	scopes(Optional)
-	 *  	state(recommended)
-	 *  
-	 *  GET /authorize?
-			response_type=code&
-			client_id=s6BhdRkqt3&state=xyz&
-			redirect_uri=https%3A%2F%Eexample%2Ecom%2Fcallback HTTP/1.1
-			Host: server.example.com
-	 * @return
-	 */
-	
-	//@Consumes("applicaiton/x-www-form-urlencoded")
-	@RequestMapping(path="/authorizationView/response_type=code"
-			+ "&client_id={client_id}"
-			+"&service_id={service_id}"
-			+"&user_id={user_id}"
-			+ "&state={state}"
-			+ "&redirect_uri={redirect_uri}",method=RequestMethod.GET)
-	public ModelAndView authorizationRequest(
-			@PathVariable("client_id") String client_id,
-			@PathVariable("service_id") String service_id,
-			@PathVariable("user_id") String user_id,
-			@PathVariable("state") String state,
-			@PathVariable("redirect_uri") String redirect_uri,
-			ModelAndView mav){
-		
-
-			logger.info("authorizationView");
-		
-			mav.addObject("client_id", "someDude");
-			mav.addObject("service_id", service_id);
-			mav.addObject("user_id", user_id);
-			mav.addObject("state", state);
-			mav.addObject("redirect_uri", redirect_uri);
-		mav.setView(new JstlView("/ssaAuthView.jsp"));
-		
-		
-		return mav;
 	}
 
 
@@ -139,47 +106,65 @@ public class ServerSideAuthController {
 	@RequestMapping(path="/authorize",method={RequestMethod.POST})
 	@Consumes("application/x-www-form-urlencoded")   
 	@Produces("application/x-www-form-urlencoded")
-	public ModelAndView authorize(
-			@RequestParam("client_id") String client_id,
-			@RequestParam("service_id") String service_id,
-			@RequestParam("user_id") String user_id,
-			@RequestParam("state") String state,
-			@RequestParam("redirect_uri") String redirect_uri,
-			@RequestParam("account") String account,
-			@RequestParam("password") String password
-			,ModelAndView mav){
+	public ModelAndView authorize(@RequestParam("ticket") String ticket
+			,ModelAndView mav,HttpSession session){
 		
 		logger.info("authorize");
 		
-		//check paramets
+		//check ticket
+		String trueTicket=(String) session.getAttribute("ticket");
+		if(trueTicket!=null && ticket.equals(ticket)){
+			
+			
+			String client_id=(String) session.getAttribute("client_id");
+			String service_id=(String) session.getAttribute("service_id");
+			String state=(String) session.getAttribute("state");
+			String redirect_uri=(String) session.getAttribute("redirect_uri");
+			//generate check if openId is exists ?
+			
+			
+			//if  not generate a openId, save in redis,send to client
+			
+			//generate authorization_code,send to client, save to redis
+			
+			
+		}
 		
-		//if success
+
 		
-		//redirect_uri="http://www.baidu.com";
-		mav.setView(new RedirectView(redirect_uri, false));
 		
 		return mav;
 		
 	}
 	
-	@RequestMapping(path="/authenticationView/service_id={service_id}&client_id={client_id}&state={state}&redirect_uri={redirect_uri}" ,method=RequestMethod.GET)
-	public ModelAndView authenticationView(@PathVariable("client_id") String client_id
-			,@PathVariable("service_id") String service_id
-			,@PathVariable("state") String state
-			,@PathVariable("redirect_uri") String redirect_uri
+	@RequestMapping(path="/authenticationView" ,method=RequestMethod.POST)
+	public ModelAndView authenticationView(@RequestParam("client_id") String client_id
+			,@RequestParam("service_id") String service_id
+			,@RequestParam("state") String state
+			,@RequestParam("redirect_uri") String redirect_uri
 			,ModelAndView mav){
 		
 		logger.info("@AuthenticationView@");
 		
 		mav.setView(new JstlView("/ssaAuthenticationView.jsp"));
-		//mav.addObject("client_id", client_id);
-		//mav.addObject("service_id", service_id);
-		//mav.addObject("state", state);
-		
-		
+		mav.addObject("client_id", client_id);
+		mav.addObject("service_id", service_id);
+		mav.addObject("state", state);
+		mav.addObject("redirect_uri", redirect_uri);
+			
 		return mav;
 	}
 	
+	/**
+	 * @param account
+	 * @param password
+	 * @param service_id
+	 * @param client_id
+	 * @param state
+	 * @param redirect_uri
+	 * @param mav
+	 * @return
+	 */
 	@RequestMapping(path="/authenticate",method=RequestMethod.POST)
 	public ModelAndView anthenticate(@RequestParam("account") String account,
 								@RequestParam("password") String password,
@@ -187,15 +172,22 @@ public class ServerSideAuthController {
 								@RequestParam("client_id") String client_id,
 								@RequestParam("state") String state,
 								@RequestParam("redirect_uri") String redirect_uri,
-								ModelAndView mav) throws URISyntaxException, JsonProcessingException{
+								ModelAndView mav,HttpSession session) {
 		logger.info("@Authenticate");
 		
+		boolean authenticatePass=false;
+		
+		
+		try {
 		PoolingHttpClientConnectionManager connManager=new PoolingHttpClientConnectionManager();
 		
 		HttpClient client=HttpClients.custom()
 							.setConnectionManager(connManager).build();
 		
+		// this uri needed change!
+		
 		HttpPost post=new HttpPost(new URI("http://localhost:8081/TF02/oauth/authenticate"));
+			post.setHeader("Content-Type", "application/json;charset=utf-8");
 		
 		Map<String, String> map=new HashMap<>();
 			map.put("account", account);
@@ -207,13 +199,9 @@ public class ServerSideAuthController {
 		
 		HttpEntity entity=new StringEntity(value, Charset.forName("utf-8"));
 			post.setEntity(entity);
-		
-		
+
 			ResponseHandler<String> handler=new BasicResponseHandler();
-			
-			
-			
-		try {
+
 			String respString=client.execute(post, handler);
 			
 			Map<String, String> resultMap=mapper.readValue(respString, HashMap.class);
@@ -221,18 +209,67 @@ public class ServerSideAuthController {
 			logger.info("result:"+resultMap.get("result"));
 			logger.info("reason:"+resultMap.get("reason"));
 			
+			if("success".equals(resultMap.get("result"))) authenticatePass=true;
+			else if("password_error".equals(resultMap.get("result"))) mav.addObject("password_error", resultMap.get("reason"));
+			else if("account_error".equals(resultMap.get("result"))) mav.addObject("account_error",resultMap.get("reason"));
+			
+			
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.out.println("URISyntaxException:"+e.getMessage());
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.out.println("ClientProtocolException:"+e.getMessage());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("IOException:"+e.getMessage());
 		}
-		
-		//boolean authenticatePass=true;
-		
-		boolean authenticatePass=true;
 		
 		if(authenticatePass){
 			
-			mav.setView(new RedirectView("http://www.processon.com", false));
+			//get user's profile infos, tmp save in session
+			
+			
+			//prepare view infos
+			Service service=serService.findByService_id(service_id);
+			Client client=cliService.findByClient_id(client_id);
+			
+			if(service!=null && client!=null){
+				List<Scope> scpList=scpService.getScopesByClientId(client.getId());
+				
+				
+				client.setClient_secrect(null);
+				
+				mav.addObject("scpList", scpList);
+				mav.addObject("client", client);
+				mav.addObject("service_name", service.getName());
+				
+				String ticket=UuidUtil.getTimeBasedUuid().toString();
+				
+				session.setAttribute("ticket", ticket);
+				
+				mav.addObject("ticket", ticket);
+				session.setAttribute("client_id", client_id);
+				session.setAttribute("service_id", service_id);
+				session.setAttribute("state", state);
+				session.setAttribute("redirect_uri", redirect_uri);
+				
+				mav.setView(new JstlView("/ssaAuthorizationView.jsp"));
+				
+				
+			}else{
+				mav.setView(new RedirectView("/err_01.jsp",true));
+			}
+			
+			
+			
+			//redirect to authorizationView
+			
+			
+			
 		}else{
 			mav.setView(new JstlView("/ssaAuthenticationView.jsp"));
 			mav.addObject("client_id", client_id);

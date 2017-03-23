@@ -38,8 +38,8 @@ public class RootConfig {
 	
 	//config  properties for mysql
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
-	private static String PASSWORD="dude";
-	private static String USERNAME="wilson";
+	private static String PASSWORD="";
+	private static String USERNAME="root";
 	private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_server";
 
 	// config  properties for redis

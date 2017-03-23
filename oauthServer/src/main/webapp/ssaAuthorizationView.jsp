@@ -1,81 +1,23 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<%@ page language="java" contentType="text/html; charset=utf-8"
-    pageEncoding="utf-8"%>
-<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix='c' uri="http://java.sun.com/jsp/jstl/core" %>
 <%
 String path = request.getContextPath();
 String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
 %>
-
-<!DOCTYPE html >
-<html >
+<!DOCTYPE html>
+<html lang='en'>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>授權登陸頁面</title>
+	<!-- bootstrap css -->
 
+	<script type="text/javascript" src='<%=basePath%>js/jquery.min.js'></script>
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+	<link rel='stylesheet' style='text/css'  href='<%=basePath%>css/ssaAuthorizationView.css'>
 
-
-<title>Insert title here</title>
-
-	<style>
-		*{
-			margin:0px auto; padding:0px;
-		}
-		
-		#app_infos{
-			width:100%;height:190px;
-			background:skyblue;
-			margin-top:30px;
-		}
-		
-				#app_profile{
-					border:3px solid red;
-					width:80px;
-					height:80px;
-					top:20px;
-				}
-				
-				#app_name{
-					border:1px solid black;
-					width:180px;
-					text-align:center;
-					line-height:30px;
-					margin-top:10px;
-					letter-spacing:6px;
-					font-size:20px;
-					font-weight:bold;
-				}
-		#scopes{
-			width:100%;height:200px;
-			background:lightgreen;
-		}
-			#tip{
-				margin-left:100px;
-				line-height:70px;
-			}
-			
-			#scopes ul{
-				margin-left:220px;
-			}
-			
-			#actions{
-				width:100%;height:120px;
-				background:red;
-			}
-		
-			#aggree{
-				width:200px;
-				height:60px;
-				border:1px solid black;
-				background:green;
-				text-align:center;
-				line-height:60px;
-				margin-top:10px;
-				letter-spacing:4px;
-			}
-		
-	</style>
 	
 </head>
 <body>
@@ -86,26 +28,47 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<IMG alt="" src="" />
 			</div>
 			<div id='app_name'>
-				<SPAN>春雨医生</SPAN>
+				<SPAN>${client.name}</SPAN>
 			</div>
 		</div>
+		
 
 		<div id='scopes'>
-			<span id='tip'>使用XXX登陆后该应用将获得以下权限:</span>
-			<ul>
-				<li><span>获得你的公开资料</span></li>
-				<li><span>使用您的医疗健康数据</span></li>
+			<span id='tip'>使用${service_name}登陆后,该应用将获得以下权限:</span>
+			<ul >
+				<c:forEach items="${scpList}" var='scp'>
+					<li><span>${scp.description }</span></li>
+				</c:forEach>
 			</ul>
 		</div>
 
 		<div id='actions'>
 			<div id='aggree'>
-				<span>授权并登陆</span>
+				<span>授權登陸</span>
 			</div>
 		</div>
+
+		<form id='authForm' action='<%=basePath%>ssa/authorize' method='post'>
+			<input type='text' name='ticket' value='${ticket}'/>
+		</form>
+		
 	</div>
 	 
-	 
+	 <script type='text/javascript'>
+		$(function(){
+			
+			$('#aggree').on({
+				'mouseenter':function(){$(this).css('background','lime')}
+				,'mouseleave':function(){$(this).css('background','green')}
+				,'click':function(){
+					
+						$('#authForm').submit();
+					
+				}
+				
+			})
+		})
+	 </script>
 	
 </body>
 </html>

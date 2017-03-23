@@ -31,13 +31,20 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<div id='auth'>
 		<form action='<%=basePath%>ssa/authenticate' method='post'>
 		<ul>
-			<li>
+			<li class='iptLi'>
 				<div class='label'></div>
 				<div class='value'><input name='account' placeholder="請填寫用戶名"/></div>
 			</li>
-			<li>
+			<li class='errLi'>
+				<div class='error'><span color='red'>${requestScope.account_error}</span></div>
+			</li>
+			<li class='iptLi'>
 				<div class='label'></div>
 				<div class='value'><input name='password' type='password' placeholder='請填寫密碼'/></div>
+				
+			</li>
+			<li class='errLi'>
+				<div class='error'><span color='red'>${requestScope.password_error}</span></div>
 			</li>
 			<li id='lastLi'>	
 					<input id='submit' type='submit' value='提交'/>
