@@ -1,287 +1,394 @@
 package oauthServer.web;
-//package oauthServer.web.openid;
-//
-//import java.io.IOException;
-//import java.net.URI;
-//import java.net.URISyntaxException;
-//import java.nio.charset.Charset;
-//import java.security.NoSuchAlgorithmException;
-//import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//import java.util.UUID;
-//
-//import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
-//
-//import org.apache.http.Header;
-//import org.apache.http.HttpResponse;
-//import org.apache.http.client.ClientProtocolException;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.ResponseHandler;
-//import org.apache.http.client.methods.CloseableHttpResponse;
-//import org.apache.http.client.methods.HttpGet;
-//import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.entity.StringEntity;
-//import org.apache.http.impl.client.BasicResponseHandler;
-//import org.apache.http.impl.client.CloseableHttpClient;
-//import org.apache.http.impl.client.HttpClients;
-//import org.apache.http.message.BasicHeader;
-//import org.apache.logging.log4j.LogManager;
-//import org.apache.logging.log4j.Logger;
-//import org.json.JSONObject;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.validation.BindingResult;
-//import org.springframework.web.HttpRequestHandler;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestMethod;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.servlet.ModelAndView;
-//import org.springframework.web.servlet.view.RedirectView;
-//
-//import com.foxconn.model.FamilyAccount;
-//import com.foxconn.model.FamilyMembers;
-//import com.foxconn.model.MembersInfo;
-//import com.foxconn.service.AccountService;
-//import static oauthServer.util.OAuthConstants.*;
-//import oauthServer.exception.OAuthAuthzException;
-//import oauthServer.exception.OpenIdException;
-//import oauthServer.model.Client;
-//import oauthServer.model.Service;
-//import oauthServer.model.User;
-//import oauthServer.service.ClientService;
-//import oauthServer.service.OAuthService;
-//import oauthServer.service.ServiceService;
-//import oauthServer.service.UserService;
-//import oauthServer.util.HttpClientUtil;
-//import oauthServer.util.OAuthUtils;
-//import static oauthServer.service.OAuthService.*;
-//
-//@Controller
-//@RequestMapping(path="/openid")
-//public class OpenIDController {
-//	
-//	private static Logger logger=LogManager.getLogger();
-//	
-//	@Autowired
-//	private HttpClientUtil httpClientUtil;
-//	@Autowired
-//	private OAuthService oauthService;
-//	@Autowired
-//	private AccountService accService;
-//	@Autowired
-//	private UserService userService;
-//	@Autowired
-//	private ServiceService serService;
-//	@Autowired
-//	private ClientService cliService;
-//
-//
-//	public OpenIDController() {
-//		// TODO Auto-generated constructor stub
-//	}
-//	
-//	
-//	@RequestMapping(path="/authView",method=RequestMethod.GET)
-//	public ModelAndView openIdAuthView(HttpServletRequest req,ModelAndView mav){
-//		
-//		mav.setView(new RedirectView("OPENID_AUTH_VIEW_PAGE"));
-//		
-//		return mav;
-//	}
-//	
-//	@RequestMapping(path="/authorize",method=RequestMethod.POST)
-//	public ModelAndView accountAuthorize(@RequestParam("tel") String tel
-//											,@RequestParam("password") String password
-//											,@RequestParam("service_id") String service_id
-//											,@RequestParam("client_id") String client_id
-//											,@RequestParam(name="user_id" ,required=false) Integer user_id
-//											,HttpServletRequest req){
-//		
-//		
-//	
-//		logger.info("/authorize: username: "+tel+" password:"+password);
-//		
-//		try{
-//			boolean authPass=false;
-//			if("tf02".equals(service_id)){
-//			
-//				FamilyAccount fa=accService.getFamilyAccountByTelAndPassword(tel, password);
-//				if(fa!=null){
-//					 List<FamilyMembers> fms=accService.findMembersInfoByFamilyId(fa.getId());
-//					 if(user_id!=null){
-//						for(FamilyMembers fm:fms) {
-//							if(Integer.valueOf(fm.getMemberId())==user_id){
-//								authPass=true;
-//							}
-//						}
-//					 }
-//				}else authPass=true;
-//
-//				
-//			}
-//			
-//			if(authPass){
-//				// generate access_token
-//				//send it to client
-//				//if client received and get status 200,then redirect user to some view!
-//				String access_token=OAuthUtils.generateUUID();
-//				
-//				CloseableHttpClient client=HttpClients.custom()
-//								.setConnectionManager(httpClientUtil.getManager())
-//								.build();
-//				
-//				String receiveAuthCode="FAKE_AUTH_CODE_URIs";
-//				
-//				HttpGet get=new HttpGet(new URI(receiveAuthCode));
-//				
-//				CloseableHttpResponse response=client.execute(get);
-//				if(response.getStatusLine().getStatusCode()==HttpServletResponse.SC_OK){
-//					//success send authCode, redirect to somewhere
-//				}else{
-//					// send error infomation to authView
-//				}
-//				
-//			}else{
-//				return null;
-//			}
-//			
-//		}catch(Exception e){
-//			
-//		}
-//		
-//		//remote calling account Service
-//		
-//		return  null;
-//	}
-//
-//	/**
-//	 * use code to get openId
-//	 * @param req
-//	 * @return
-//	 */
-//	@RequestMapping(path="/openId/code={code}&state={state}",method=RequestMethod.GET)
-//	public ResponseEntity<Map<String, String>> useTokenForOpenId(@PathVariable("code") String code,
-//								@PathVariable("state") String state,HttpServletRequest req){
-//		
-//			logger.info("code:"+code+" state:"+state);
-//			//first , check if code is valid
-//			
-//			Map<String, String> map=new HashMap<>();
-//			
-//			
-//				
-//				String scuKey=code.substring(code.indexOf('#')+1, code.lastIndexOf('#'));
-//				
-//				Map<String, String> result=oauthService.getOpenIdAuthToken(scuKey);
-//				if(result!=null){
-//					String authCode=code.substring(code.lastIndexOf('#')+1);
-//					
-//					
-//					if(result.get(REDIS_FIELD_CODE).equals(authCode)){
-//						// validate success
-//						
-//						//check if openId is exists, and generation is OK
-//						
-//						Map<String, String> openIdMap=oauthService.getOpenId(scuKey);
-//						String openId=null;
-//						if(openIdMap==null){
-//							//generate and save in database
-//							String[] subKeyAry=scuKey.split(":");
-//							openId=oauthService.addOpenId(Integer.parseInt(subKeyAry[0]),
-//									Integer.parseInt(subKeyAry[1]),
-//									Integer.parseInt(subKeyAry[2]));
-//							
-//						}else{
-//							openId=openIdMap.get(REDIS_KEY_OPENID);
-//						}
-//						
-//						//if openId is not exists, generate and send to client
-//						
-//						// else if openId exists, send to user
-//						
-//					}else{
-//						//validate failed, fatal!!!
-//					}
-//				}else{
-//					//not found , may be auth code is expired 
-//				}
-//
-//			return null;
-//		
-//	}
-//
-//	
-//	/**
-//	 *  需呀返回auth_code,state
-//	 * @param auth_code
-//	 * @param receive_authcode_uri
-//	 * @param state
-//	 * @return
-//	 * @throws URISyntaxException
-//	 * @throws ClientProtocolException
-//	 * @throws IOException
-//	 */
-//	public CloseableHttpResponse sendAuthzCodeToClient(String auth_code,String receive_authcode_uri,String state) throws URISyntaxException, ClientProtocolException, IOException{
-//		// add scope utils later!
-//		
-//		List<Header> http_headers=new ArrayList<>();
-//
-//			Header header=new BasicHeader(STATE,state);
-//			http_headers.add(header);
-//			
-//		CloseableHttpClient client=HttpClients.custom()
-//										.setConnectionManager(httpClientUtil.getManager())
-//										.setDefaultHeaders(http_headers).build();
-//		
-//		HttpPost post=new HttpPost(new URI(receive_authcode_uri));
-//			
-//			post.setHeader("content-type", "application/json;charset=utf-8");
-//			
-//			Map<String, String> result=new HashMap<>();
-//				result.put(CODE, auth_code);
-//				result.put(STATE, state);
-//
-//			
-//			JSONObject jsonObj=new JSONObject(result);
-//			
-//			post.setEntity(new StringEntity(jsonObj.toString(), Charset.forName("UTF-8")));
-//		
-//			return client.execute(post);
-//
-//	}
-//	
-//	/**
-//	 *  User login with openId
-//	 * @param service_id
-//	 * @param client_id
-//	 * @param openid
-//	 * @param req
-//	 * @return
-//	 */
-//	@RequestMapping(path="/login/serice_id={service_id}&client_id={client_id}&openid={openid}")
-//	public ResponseEntity loginWithOpenid(@PathVariable("service_id") String service_id,
-//										@PathVariable("client_id") String client_id,
-//										@PathVariable("openid") String openid,
-//										HttpServletRequest req){
-//		logger.info("service_id:"+service_id+" client_id:"+client_id+" openid:"+openid);
-//		
-//		
-//		Map<String, String> userInfo=oauthService.getUserInfoByOpenId(openid);
-//		if(userInfo!=null){
-//			return new ResponseEntity<>(userInfo, HttpStatus.OK);
-//		}else{
-//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//		}
-//			
-//		
-//		
-//	}
-//	
-//
-//}
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.util.UuidUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.view.JstlView;
+import org.springframework.web.servlet.view.RedirectView;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import oauthServer.model.Client;
+import oauthServer.model.Scope;
+import oauthServer.model.Service;
+import oauthServer.service.ClientService;
+import oauthServer.service.OAuth2Service;
+import oauthServer.service.ScopeService;
+import oauthServer.service.ServiceService;
+import oauthServer.util.TicketType;
+
+import static oauthServer.util.OAuthUtils.*;
+
+
+@Controller
+@RequestMapping(path="/openid")
+public class OpenIDController {
+	
+	private static Logger logger=LogManager.getLogger();
+	
+	@Autowired
+	private ServiceService serService;
+	@Autowired
+	private ClientService cliService;
+	@Autowired
+	private OAuth2Service oauth2Service;
+	@Autowired
+	private ScopeService scpService;
+
+
+	/**
+	 * 
+	 * Login with openId
+	 * 
+	 * @param openid
+	 * @return
+	 * @throws ClientProtocolException
+	 * @throws IOException
+	 */
+
+	@RequestMapping(path="/login/openid={openid}",method=RequestMethod.GET,produces={"application/json;charset=utf-8"})
+	public ResponseEntity<Map<String, String>> loginWithOpenId(@PathVariable("openid") String openid
+								) throws ClientProtocolException, IOException{
+		
+		logger.info("@openid:"+openid);
+
+		int splitIndex=openid.lastIndexOf(":");
+		String valPart=openid.substring(splitIndex+1);
+		String keyPart=openid.substring(0, splitIndex);
+		
+		
+		String value=oauth2Service.getVal(keyPart);
+		
+		
+		
+		if(value!=null && value.equals(valPart)){
+			//get user's information through httpClient Request
+			//Service service=serService.findByService_id(service_id);
+			
+			int service_id_int=Integer.parseInt(openid.split(":")[1]);
+			int user_id_int=Integer.parseInt(openid.split(":")[2]);
+			
+			logger.info("uservice_id_int:"+service_id_int);
+			logger.info("user_id_int:"+user_id_int);
+			
+			Service service=serService.findById(service_id_int);
+			
+			HttpGet getUserInfo=new HttpGet(service.getUserinfo_uri()+user_id_int);
+				//getUserInfo.setEntity(new StringEntity("user_id="+user_id_int, Charset.forName("utf-8")));
+			
+			CloseableHttpClient httpClient=HttpClients.createDefault();
+				CloseableHttpResponse response=httpClient.execute(getUserInfo);
+
+				//if get successful , return user's infomation to client-app
+				if(response.getStatusLine().getStatusCode()==HttpServletResponse.SC_OK){
+
+					ObjectMapper mapper=new ObjectMapper();
+					
+					HttpEntity entity=response.getEntity();
+
+					String respVal=EntityUtils.toString(entity);
+					
+					logger.info("respVal:"+respVal);
+					
+					//Map<String, Object> result=mapper.convertValue(respVal, HashMap.class);
+					
+					Map<String, String> map=new HashMap<>();
+						map.put("user_info", respVal);
+	
+					return new ResponseEntity<Map<String,String>>(map, HttpStatus.OK);
+				}else{
+					Map<String, String> errMap=new HashMap<>();
+						errMap.put("statusCode", Integer.toString((response.getStatusLine().getStatusCode())));
+						errMap.put("reasonPhrase", response.getStatusLine().getReasonPhrase());
+					return new ResponseEntity<Map<String,String>>(errMap, HttpStatus.INTERNAL_SERVER_ERROR);
+				}
+			//else return error_description
+		}else{
+			//openid authorization failed, maybe openid expired or gone, please 
+			//redirect user to authentication flow!
+			Map<String, String> errResult=new HashMap<>();
+				errResult.put("error_description", "未找到openid！可能已過期，或升級刪除!請重新將用戶導向登陸授權頁面!");
+			return new ResponseEntity<>(errResult,HttpStatus.NOT_FOUND);
+			
+		}
+
+	}
+	
+	@RequestMapping(path="/retrive/code={code}",method=RequestMethod.POST,produces={"application/json;charset=utf-8"})
+	@ResponseBody
+	public ResponseEntity<Map<String, String>> retriveOpenId(@PathVariable("code") String code
+			,@RequestParam("service_id") String service_id
+			,@RequestParam("client_id") String client_id
+			,@RequestParam("user_id") String user_id,HttpServletResponse resp){
+		
+		//resp.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		//resp.setCharacterEncoding("utf-8");
+		
+		logger.info("@Retrive OpenId");
+		
+		Map<String, String> respMap=new HashMap<>();
+		logger.info("code:"+code);
+		
+		int splitIndex=code.lastIndexOf(":");
+		String keyPart=code.substring(0, splitIndex);
+		String valPart=code.substring(splitIndex+1);
+		
+		String value=oauth2Service.getVal(keyPart);
+		logger.info("value:"+value);
+		if(value!=null && value.equals(valPart)){
+			
+			//check if openId is exist!
+			
+			Service service=serService.findByService_id(service_id);
+			Client client=cliService.findByClient_id(client_id);
+			
+			int service_id_int=service.getId();
+			int client_id_int=client.getId();
+		
+			String patten=new StringBuilder(REDIS_KEY_OPENID).append(":")
+						.append(service_id_int)
+						.append(":").append(client_id_int).append(":*").toString();
+		
+			String openid=null;
+			
+			logger.info("PATTERN:"+patten);
+			Set<String> keys=oauth2Service.keys(patten);
+			logger.info("KEY-SIZE:"+keys.size());
+			if(keys!=null && keys.size()>0){
+				//return old openid
+				logger.info("FOUND:"+keys.size());
+				 openid=keys.iterator().next();
+				 logger.info("OPENID::"+openid);
+			}else{
+				//create new openid
+				  String openidKey=generateKey_OpenId(service_id_int, Integer.parseInt(user_id));
+				 //save in redis
+				   openid=oauth2Service.addTicket(openidKey,TicketType.OPEN_ID);
+				  //expire autho-code
+				  oauth2Service.expires(keyPart);
+			}
+			//send to client-server
+				respMap.put("openid", openid);
+			
+				return new ResponseEntity<Map<String,String>>(respMap, HttpStatus.OK);			
+		}else
+			
+				respMap.put("error_description", "not found authorization code, check if the authorization code for open-id is syntax right, or it's expired?");
+				return new ResponseEntity<>(respMap,HttpStatus.NOT_FOUND);
+	}
+	
+	
+	/**
+	 * 
+	 * Authentication View
+	 * 
+	 * @param client_id
+	 * @param service_id
+	 * @param state
+	 * @param redirect_uri
+	 * @param mav
+	 * @return
+	 */
+	@RequestMapping(path="/authenticationView" ,method=RequestMethod.POST,produces={MediaType.APPLICATION_FORM_URLENCODED})
+	@Produces(MediaType.APPLICATION_FORM_URLENCODED)
+	public ModelAndView authenticationView(@RequestParam("client_id") String client_id
+			,@RequestParam("service_id") String service_id
+			,@RequestParam("state") String state
+			,@RequestParam("redirect_uri") String redirect_uri
+			,@RequestParam("user_id") String user_id
+			,ModelAndView mav,HttpServletResponse resp){
+		
+			logger.info("@AuthenticationView@");
+			
+			JstlView view=new JstlView("/ssaAuthenticationView.jsp");
+			mav.setView(view);
+			
+			mav.addObject("client_id", client_id);
+			mav.addObject("service_id", service_id);
+			mav.addObject("state", state);
+			mav.addObject("redirect_uri", redirect_uri);
+			mav.addObject("user_id", user_id);
+			
+			resp.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+			
+			//mav.setViewName("dude");
+				
+			return mav;
+	}
+	
+	
+	
+
+	
+	/**
+	 * 
+	 * Authenticate
+	 * 
+	 * @param account
+	 * @param password
+	 * @param service_id
+	 * @param client_id
+	 * @param state
+	 * @param redirect_uri
+	 * @param mav
+	 * @return
+	 * @throws IOException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(path="/authenticate",method=RequestMethod.POST,produces={MediaType.APPLICATION_FORM_URLENCODED})
+	public ModelAndView anthenticate(@RequestParam("account") String account,
+								@RequestParam("password") String password,
+								@RequestParam("service_id") String service_id,
+								@RequestParam("client_id") String client_id,
+								@RequestParam("state") String state,
+								@RequestParam("redirect_uri") String redirect_uri,
+								@RequestParam("user_id") String user_id,
+								ModelAndView mav,HttpSession session) throws IOException {
+		
+			logger.info("@Authenticate");
+			
+			boolean authenticatePass=false;
+			
+			Map<String, Object> resultMap=null;
+			
+			
+			CloseableHttpClient httpClient=null;
+			try {
+
+				httpClient=HttpClients.createDefault();
+			
+				// this uri needed change!
+			
+			HttpPost post=new HttpPost(new URI("http://localhost:8081/TF02/oauth/authenticate"));
+				post.setHeader("Content-Type", "application/json;charset=utf-8");
+			
+			Map<String, String> map=new HashMap<>();
+				map.put("account", account);
+				map.put("password", password);
+				map.put("user_id", user_id);
+			
+			ObjectMapper mapper=new ObjectMapper();
+				
+			String value=mapper.writeValueAsString(map);
+			
+			HttpEntity entity=new StringEntity(value, Charset.forName("utf-8"));
+				post.setEntity(entity);
+	
+				ResponseHandler<String> handler=new BasicResponseHandler();
+	
+				String respString=httpClient.execute(post, handler);
+				
+					resultMap=mapper.readValue(respString, HashMap.class);
+				
+				logger.info("result:"+resultMap.get("result"));
+				logger.info("reason:"+resultMap.get("reason"));
+				
+				if("success".equals(resultMap.get("result"))) authenticatePass=true;
+				else if("password_error".equals(resultMap.get("result"))) mav.addObject("password_error", resultMap.get("reason"));
+				else if("account_error".equals(resultMap.get("result"))) mav.addObject("account_error",resultMap.get("reason"));
+				else if("fail".equals(resultMap.get("result"))) mav.addObject("fail", resultMap.get("reason"));
+				
+				
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				System.out.println("URISyntaxException:"+e.getMessage());
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				System.out.println("ClientProtocolException:"+e.getMessage());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				System.out.println("IOException:"+e.getMessage());
+			}finally{
+				if(httpClient!=null) 
+						httpClient.close();
+			}
+			
+			if(authenticatePass){
+				
+				//get user's profile infos, tmp save in session
+				session.setAttribute("user_info", resultMap.get("user_info"));
+				
+				//prepare view infos
+				Service service=serService.findByService_id(service_id);
+				Client client=cliService.findByClient_id(client_id);
+				
+				if(service!=null && client!=null){
+					List<Scope> scpList=scpService.getScopesByClientId(client.getId());
+
+					client.setClient_secrect(null);
+					
+					mav.addObject("scpList", scpList);
+					mav.addObject("client", client);
+					mav.addObject("service_name", service.getName());
+					
+					String ticket=UuidUtil.getTimeBasedUuid().toString();
+					
+					session.setAttribute("ticket", ticket);
+					
+					mav.addObject("ticket", ticket);
+					session.setAttribute("client_id", client_id);
+					session.setAttribute("service_id", service_id);
+					session.setAttribute("user_id", user_id);
+					session.setAttribute("state", state);
+					session.setAttribute("redirect_uri", redirect_uri);
+					
+					mav.setView(new JstlView("/ssaAuthorizationView.jsp"));
+						
+				}else{
+					mav.setView(new RedirectView("/err_01.jsp",true));
+				}
+				
+				//redirect to authorizationView
+			}else{
+				mav.setView(new JstlView("/ssaAuthenticationView.jsp"));
+				mav.addObject("client_id", client_id);
+				mav.addObject("service_id",service_id);
+				mav.addObject("redirect_uri", redirect_uri);
+				mav.addObject("state", state);
+				
+			}
+			
+			return mav;
+	}
+	
+	
+
+}

@@ -29,4 +29,12 @@ public class ServiceServiceImpl implements ServiceService{
 		return sDao.findByService_id(service_id);
 	}
 
+	@Override
+	public Service findById(int id) {
+		// TODO Auto-generated method stub
+		return sDao.findById(id);
+	}
+	
+
+
 }

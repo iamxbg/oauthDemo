@@ -29,4 +29,11 @@ public class ServiceDaoImpl implements ServiceDao{
 				.setString("service_id", service_id).uniqueResult();
 	}
 
+	@Override
+	public Service findById(int id) {
+		// TODO Auto-generated method stub
+		return (Service) sf.getCurrentSession().createQuery("from Service s where s.id=:id")
+					.setInteger("id",id).uniqueResult();
+	}
+
 }

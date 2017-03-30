@@ -29,7 +29,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	
 	</div>
 	<div id='auth'>
-		<form action='<%=basePath%>ssa/authenticate' method='post'>
+		<form action='<%=basePath%>openid/authenticate' method='post'>
 		<ul>
 			<li class='iptLi'>
 				<div class='label'></div>
@@ -46,6 +46,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<li class='errLi'>
 				<div class='error'><span color='red'>${requestScope.password_error}</span></div>
 			</li>
+			<li class='errLi'>
+				<div class='error'><span color='red'>${requestScope.fail}</span></div>
+			</li>
 			<li id='lastLi'>	
 					<input id='submit' type='submit' value='提交'/>
 			</li>
@@ -53,6 +56,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<input type='text' name='client_id' value='${requestScope.client_id}'/>
 			<input type='text' name='state' value='${requestScope.state}'/>
 			<input type='text' name='redirect_uri' value='${requestScope.redirect_uri }'/>
+			<input type='text' name='user_id' value=${requestScope.user_id }/>
 		</ul>
 		</form>
 	</div>

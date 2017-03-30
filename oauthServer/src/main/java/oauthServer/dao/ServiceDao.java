@@ -15,4 +15,6 @@ public interface ServiceDao {
 	
 	public Service findByService_id(String service_id);
 	
+	public Service findById(int id);
+	
 }

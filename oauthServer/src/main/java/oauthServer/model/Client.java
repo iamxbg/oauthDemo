@@ -19,33 +19,15 @@ public class Client {
 	private String description;
 	private String provider;
 	private String receive_authcode_uri;
-	private String receive_token_uri;
 	private String auth_type;
 	private int del_flag=0;
 	private String profile;
+
 	
 	public Client() {
 		// TODO Auto-generated constructor stub
 	
 	}
-	
-	
-
-	public Client(String client_id, String name, String client_secrect, String description, String provider,
-			String receive_authcode_uri, String receive_token_uri, String auth_type, String profile) {
-		super();
-		this.client_id = client_id;
-		this.name = name;
-		this.client_secrect = client_secrect;
-		this.description = description;
-		this.provider = provider;
-		this.receive_authcode_uri = receive_authcode_uri;
-		this.receive_token_uri = receive_token_uri;
-		this.auth_type = auth_type;
-		this.profile = profile;
-	}
-
-
 
 	public int getId() {
 		return id;
@@ -103,14 +85,6 @@ public class Client {
 		this.receive_authcode_uri = receive_authcode_uri;
 	}
 
-	public String getReceive_token_uri() {
-		return receive_token_uri;
-	}
-
-	public void setReceive_token_uri(String receive_token_uri) {
-		this.receive_token_uri = receive_token_uri;
-	}
-
 	public String getAuth_type() {
 		return auth_type;
 	}
@@ -134,8 +108,7 @@ public class Client {
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}
-	
-	
-	
+
+
 
 }

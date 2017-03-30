@@ -38,13 +38,17 @@ public class RootConfig {
 	
 	//config  properties for mysql
 	private static String DRIVER_CLASS_NAME="com.mysql.jdbc.Driver";
-	private static String PASSWORD="";
-	private static String USERNAME="root";
-	private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_server";
+	//private static String PASSWORD="";
+	//private static String USERNAME="root";
+	private static String USERNAME="tfdb_w";
+	private static String PASSWORD="tfdbw88.";
+	//private static String URI="jdbc:mysql://127.0.0.1:3306/oauth_server";
+	private static String URI="jdbc:mysql://10.244.134.129:3306/tfdb_t";
 
 	// config  properties for redis
 	private static String REDIS_PASSWORD="";
-	private static String REDIS_HOSTNAME="10.244.134.189";
+	private static String REDIS_HOSTNAME="10.244.171.37";
+	//private static String REDIS_HOSTNAME="10.244.134.189";
 	
 		
 
